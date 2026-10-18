@@ -9,7 +9,7 @@
 An AI agent that finds carbon credits counted twice, by reasoning over a **FalkorDB** graph.
 A person makes every decision.
 
-[Live demo](#links) · [Demo video](#links) · [Blog post](#links) · [How it works](#how-it-works) · [Run it](#set-it-up)
+[Live demo](#links) · [Android app](#links) · [Demo video](#links) · [Blog post](#links) · [How it works](#how-it-works) · [Run it](#set-it-up)
 
 Built for **Graph Hacks: Context for AI Agents** (WeMakeDevs x FalkorDB) · **Track 1: Agents That Act on Connected Data**
 
@@ -253,6 +253,7 @@ This project was built with AI assistance. Claude (Anthropic) wrote most of the 
 ## Links
 
 * **Live demo:** https://ecograph-790j.onrender.com
+* **Android app (APK):** [Download the latest release](https://github.com/olowolayemogoodness-crypto/ecograph/releases/latest/download/ecograph.apk)
 * **Demo video:** _add your video link here_
 * **Blog post:** _add your blog link here_
 

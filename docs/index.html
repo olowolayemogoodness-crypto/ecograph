@@ -85,6 +85,13 @@ code{font-family:'JetBrains Mono',monospace;font-size:.82em;background:var(--ink
 .chip.c2{background:var(--violet);border-color:var(--violet);color:#fff}
 .chip.c3{background:var(--red);border-color:var(--red);color:var(--ink)}
 
+.cta{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 30px}
+.cta a{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font:800 18px 'Schibsted Grotesk',sans-serif;border:3px solid var(--cream);border-radius:999px;padding:15px 28px;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.cta a:hover{transform:translate(-2px,-3px) rotate(-1deg)}
+.cta .live{background:var(--lime);color:var(--ink);border-color:var(--lime);box-shadow:5px 6px 0 var(--red)}
+.cta .apk{background:var(--yellow);color:var(--ink);border-color:var(--yellow);box-shadow:5px 6px 0 var(--violet)}
+.cta svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+
 /* stat tiles */
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:3px solid var(--ink)}
 .tile{padding:36px 26px 40px;border-right:3px solid var(--ink)}
@@ -209,6 +216,10 @@ footer a{color:var(--lime)}
     <span class="tag" style="color:var(--lime)">Graph Hacks 2026 · Track 1</span>
     <h1>One tonne,<br><span class="r">claimed</span> <span class="y">twice.</span></h1>
     <p class="lede">I built an AI agent that finds double-counted carbon credits by reasoning over a graph. A person makes every decision.</p>
+    <div class="cta">
+      <a class="live" href="https://ecograph-790j.onrender.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>Open the live demo</a>
+      <a class="apk" href="https://github.com/olowolayemogoodness-crypto/ecograph/releases/latest/download/ecograph.apk" download><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>Download the Android app (APK)</a>
+    </div>
     <div class="chips"><span class="chip c1">FalkorDB</span><span class="chip c2">Gemini</span><span class="chip c3">Flutter</span><span class="chip">6 min read</span><span class="chip">All data synthetic</span></div>
   </div>
 </header>
@@ -378,6 +389,7 @@ footer a{color:var(--lime)}
     <h3 class="mid reveal" style="margin-top:60px">Try it</h3>
     <ul class="list narrow links reveal">
       <li>Code: <a href="https://github.com/olowolayemogoodness-crypto/ecograph">github.com/olowolayemogoodness-crypto/ecograph</a></li>
+      <li>Android app: <a href="https://github.com/olowolayemogoodness-crypto/ecograph/releases/latest/download/ecograph.apk">Download the APK</a></li>
       <li>Live demo: <a href="https://ecograph-790j.onrender.com">https://ecograph-790j.onrender.com</a></li>
       <li>Demo video: <a href="VIDEO_URL">VIDEO_URL</a></li>
     </ul>
