@@ -46,7 +46,7 @@ FalkorDB, OpenCypher, `algo.WCC`, `algo.betweenness`, the MCP Python SDK, Claude
 
 - Source code: `<GitHub repo URL>`
 - Live demo: `<Render URL>`
-- Demo video: `<video URL>`
+- Demo video: https://youtu.be/razXGl26_0A
 - Blog post: `<blog URL>`
 - Slides and APK (optional): `<Google Drive folder URL>`
 

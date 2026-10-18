@@ -128,7 +128,7 @@ I built this with AI help. Claude wrote much of the code, tests and documentatio
 - Live demo: https://ecograph-790j.onrender.com
 - Land map dashboard: https://ecograph-790j.onrender.com/dashboard
 - Android app: https://github.com/olowolayemogoodness-crypto/ecograph/releases/latest/download/ecograph.apk
-- Demo video: [add your video link]
+- Demo video: https://youtu.be/razXGl26_0A
 
 The README has a five-step setup. All data is synthetic, and nothing here accuses a real company.
 

@@ -255,8 +255,8 @@ This project was built with AI assistance. Claude (Anthropic) wrote most of the 
 * **Live demo:** https://ecograph-790j.onrender.com
 * **Land map dashboard:** https://ecograph-790j.onrender.com/dashboard
 * **Android app (APK):** [Download the latest release](https://github.com/olowolayemogoodness-crypto/ecograph/releases/latest/download/ecograph.apk)
-* **Demo video:** _add your video link here_
-* **Blog post:** _add your blog link here_
+* **Demo video:** https://youtu.be/razXGl26_0A
+* **Blog post:** https://olowolayemogoodness-crypto.github.io/ecograph/
 
 ## License
 
