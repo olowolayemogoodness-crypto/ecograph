@@ -88,7 +88,7 @@ class _AppShellState extends State<AppShell> {
                     setState(() => error = null);
                     load();
                   })
-                : Center(child: PulseDot(color: Tone.ink, size: 14)),
+                : _Connecting(),
           ),
         );
       }
@@ -755,4 +755,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+}
+
+
+class _Connecting extends StatefulWidget {
+  @override
+  State<_Connecting> createState() => _ConnectingState();
+}
+
+class _ConnectingState extends State<_Connecting> {
+  bool slow = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(seconds: 5), () {
+      if (mounted) setState(() => slow = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 36),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            PulseDot(color: Tone.forest, size: 16),
+            SizedBox(height: 18),
+            Text('Connecting to the server', style: sans(16, weight: FontWeight.w700)),
+            if (slow) ...[
+              SizedBox(height: 8),
+              Text(
+                'The free server sleeps when idle. Waking it up can take up to a minute. Please wait.',
+                textAlign: TextAlign.center,
+                style: sans(14, color: Tone.ink2, height: 1.4),
+              ),
+            ],
+          ]),
+        ),
+      );
 }

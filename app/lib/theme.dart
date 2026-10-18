@@ -4,16 +4,16 @@ import 'dart:math' show cos, sin, pi;
 import 'package:flutter/material.dart';
 
 class Tone {
-  static const ground = Color(0xFFF3F1EC);
+  static const ground = Color(0xFFE6F2D3);
   static const paper = Color(0xFFFFFFFF);
-  static const ink = Color(0xFF0C111B);
-  static const ink2 = Color(0xFF4A5565);
-  static const ink3 = Color(0xFF5E6877);
-  static const line = Color(0xFFE3DFD5);
-  static const line2 = Color(0xFFEFEBE2);
-  static const dots = Color(0xFFD9D4C8);
-  static const plot = Color(0xFFFAF8F3);
-  static const edge = Color(0xFF8C97A8);
+  static const ink = Color(0xFF0B2E1C);
+  static const ink2 = Color(0xFF3A5643);
+  static const ink3 = Color(0xFF4B6654);
+  static const line = Color(0xFFCFE2B8);
+  static const line2 = Color(0xFFDDEBC9);
+  static const dots = Color(0xFFB5CF9A);
+  static const plot = Color(0xFFF1F8E6);
+  static const edge = Color(0xFF6E8F78);
   static const vermilion = Color(0xFFC8321F);
   static const vermilionTint = Color(0xFFFBE9E5);
   static const coral = Color(0xFFFF9A8A);
@@ -24,10 +24,13 @@ class Tone {
   static const agent = Color(0xFF2F3FC2);
   static const agentTint = Color(0xFFE8EBFD);
   static const sand = Color(0xFFE2B866);
-  static const navyLine = Color(0xFF2C3850);
-  static const navyText = Color(0xFFB9C3D4);
-  static const navyMuted = Color(0xFF8B95A8);
-  static const navyCard = Color(0xFF141B29);
+  static const leaf = Color(0xFF8CC63F);
+  static const forest = Color(0xFF136437);
+  static const leafTint = Color(0xFFEFF7E1);
+  static const navyLine = Color(0xFF2A6B45);
+  static const navyText = Color(0xFFD3EBC2);
+  static const navyMuted = Color(0xFF9CC4A0);
+  static const navyCard = Color(0xFF0F4A2A);
 
   static const rCard = 24.0;
   static const rInner = 18.0;
@@ -43,7 +46,7 @@ TextStyle mono(double size, {FontWeight weight = FontWeight.w400, Color color = 
     TextStyle(fontFamily: _monoFamily, fontSize: size, fontWeight: weight, color: color, height: height, letterSpacing: spacing);
 
 ThemeData buildTheme() {
-  final scheme = ColorScheme.fromSeed(seedColor: Tone.ink, brightness: Brightness.light).copyWith(
+  final scheme = ColorScheme.fromSeed(seedColor: Tone.forest, brightness: Brightness.light).copyWith(
     primary: Tone.ink,
     onPrimary: Colors.white,
     secondary: Tone.vermilion,
@@ -105,7 +108,7 @@ String findingLabel(String t) => switch (t) {
     };
 
 Color kindColor(String k) => switch (k) {
-      'project' => const Color(0xFF0C111B),
+      'project' => const Color(0xFF0B2E1C),
       'parcel' => const Color(0xFFE2B866),
       'registry' => const Color(0xFF5E6B80),
       'credit' => const Color(0xFF4F8FE0),
@@ -186,7 +189,7 @@ class Wordmark extends StatelessWidget {
   const Wordmark({Key? key, this.color = Tone.ink, this.glyph = Tone.ink, this.size = 22}) : super(key: key);
   @override
   Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
-        Glyph(size: size + 8, color: glyph, accent: glyph == Tone.ink ? Tone.vermilion : Tone.coral),
+        ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset('assets/logo.png', height: size + 12, fit: BoxFit.contain)),
         SizedBox(width: 10),
         Text('EcoGraph', style: sans(size, weight: FontWeight.w700, color: color, spacing: -0.2)),
       ]);
@@ -518,7 +521,7 @@ class EcoTabBar extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         margin: margin,
         padding: EdgeInsets.all(4),
-        decoration: BoxDecoration(color: Color(0xFFE7E3D9), borderRadius: BorderRadius.circular(999)),
+        decoration: BoxDecoration(color: Color(0xFFD5E6BE), borderRadius: BorderRadius.circular(999)),
         child: TabBar(
           controller: controller,
           splashFactory: NoSplash.splashFactory,

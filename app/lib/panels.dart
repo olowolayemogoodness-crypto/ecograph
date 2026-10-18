@@ -79,14 +79,14 @@ class WhyPanel extends StatelessWidget {
       Container(
         width: double.infinity,
         padding: EdgeInsets.fromLTRB(14, 12, 14, 12),
-        decoration: BoxDecoration(color: Color(0xFFF3F5F7), borderRadius: BorderRadius.circular(18)),
+        decoration: BoxDecoration(color: Color(0xFFF1F8E6), borderRadius: BorderRadius.circular(18)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('HOW THE SCORE IS BUILT', style: mono(12, weight: FontWeight.w700, color: Tone.ink2, spacing: 1)),
           SizedBox(height: 8),
           Text(formula, style: mono(13, height: 1.7)),
           Text('= 1 − ${p.toStringAsFixed(4)}', style: mono(13, height: 1.7)),
           SizedBox(height: 6),
-          Container(height: 1, color: Color(0xFFAEBBC8)),
+          Container(height: 1, color: Color(0xFF9DB88A)),
           SizedBox(height: 8),
           Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
             Expanded(child: Text('A rule of thumb, not a probability.', style: sans(13, color: Tone.ink2))),
@@ -659,7 +659,7 @@ class _DecisionSheetState extends State<_DecisionSheet> {
             Container(
               width: double.infinity,
               padding: EdgeInsets.fromLTRB(14, 12, 14, 12),
-              decoration: BoxDecoration(color: Color(0xFFF3F5F7), borderRadius: BorderRadius.circular(18)),
+              decoration: BoxDecoration(color: Color(0xFFF1F8E6), borderRadius: BorderRadius.circular(18)),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
                   Expanded(child: Text('CREDITS TO FREEZE', style: mono(12, weight: FontWeight.w700, color: Tone.ink2, spacing: 1))),

@@ -84,7 +84,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Tone.ink,
         body: Stack(fit: StackFit.expand, children: [
-          GooField(colors: [Color(0xFF1B2540), Tone.agent, Color(0xFF26324F), Tone.coral, Color(0xFF3A4A78)], background: Tone.ink),
+          GooField(colors: [Tone.forest, Tone.leaf, Color(0xFF1E7A45), Color(0xFFB9E37A), Color(0xFF2E9150)], background: Tone.ink),
           Center(
             child: TweenAnimationBuilder<double>(
               tween: Tween(begin: 0, end: 1),
@@ -95,11 +95,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Transform.scale(
                   scale: 0.6 + 0.4 * t,
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Container(
-                      width: 92,
-                      height: 92,
-                      decoration: BoxDecoration(color: Tone.ground, borderRadius: BorderRadius.circular(30)),
-                      child: Center(child: Glyph(size: 54, color: Tone.ink, accent: Tone.vermilion)),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: Image.asset('assets/logo.png', width: 210, height: 112, fit: BoxFit.cover),
                     ),
                     SizedBox(height: 22),
                     Text('EcoGraph', style: sans(36, weight: FontWeight.w800, color: Colors.white, spacing: -1)),
@@ -131,7 +129,7 @@ class WelcomeScreen extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(36),
                     child: Stack(fit: StackFit.expand, children: [
-                      GooField(colors: [Tone.sand, Tone.coral, Color(0xFFB8C2F5), Color(0xFFF2D9A6), Color(0xFFFFC9BF)], background: Color(0xFFFBF7EE), blobScale: 1.1),
+                      GooField(colors: [Tone.leaf, Color(0xFFBFE08A), Color(0xFFD9EFA9), Tone.sand, Color(0xFFA6D86B)], background: Tone.leafTint, blobScale: 1.1),
                       Positioned(left: 22, top: 22, child: Wordmark(size: 20)),
                     ]),
                   ),
