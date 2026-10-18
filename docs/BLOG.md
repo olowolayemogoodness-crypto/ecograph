@@ -88,9 +88,29 @@ The agent runs on Gemini in my demo. The same loop works with Claude or any Open
 
 ## The app
 
-The interface is a Flutter app for iOS, Android and web. You open it and see five cases that need a decision and 27,880 tonnes at risk. Tap *Triage every open case* and the agent ranks them. Open the top case and you see the graph with the suspicious links in red. Trace one credit from its retirement back to the land. Freeze it, and the History tab records that you agreed with the agent.
+The interface is a Flutter app for iOS, Android and web. On a wide screen it becomes a review console, and a separate land-map dashboard plots every parcel on a world map, red where two projects claim the same land. You open it and see five cases that need a decision and 27,880 tonnes at risk. Tap *Triage every open case* and the agent ranks them. Open the top case and you see the graph with the suspicious links in red. Trace one credit from its retirement back to the land. Freeze it, and the History tab records that you agreed with the agent.
 
 A scan of the whole ledger takes about 0.15 seconds. On the synthetic data the detectors found 7 of 7 planted frauds with 0 false alarms on the 6 decoys. Because I planted the frauds myself, this shows the queries do what they claim. It says nothing about accuracy on a real registry, whose data is much messier.
+
+## Setbacks, and what each one taught me
+
+**1. The query that never finished.** My first loop detector asked for any closed walk of three to six sales. On 121 traders it had not finished after two minutes. One property filter, the same credit id on every hop, made it return in under a second and fixed a correctness bug too. Lesson: let the pattern's own definition constrain the traversal.
+
+**2. The database would not start on the server.** The embedded FalkorDB build needs a recent Linux (glibc 2.39 or newer). A Debian 12 image could not run it, so the Docker image had to move to Debian 13. Lesson: read a dependency's platform requirements before picking a base image.
+
+**3. The free server fell asleep.** On Render's free plan the server sleeps when idle and takes up to a minute to wake. My app showed a pulsing dot and nothing else, so it looked broken. I added a clear "Connecting to the server" message and a free uptime monitor that checks the health endpoint every five minutes. My first monitor returned a 404 because I mistyped the URL. Lesson: test the boring path first.
+
+**4. The Android app said "can't reach server".** A release build defaults to the emulator's address for the host machine, which means nothing on a real phone. The live server address has to be baked in at build time with a Dart define. Lesson: defaults that work on a laptop quietly fail in a user's hand.
+
+**5. The map asked for an API key.** My first map tiles came from a provider that now requires a key, and the map filled with "API KEY REQUIRED" watermarks. I switched to OpenStreetMap tiles, which need none. Lesson: check what a free service really costs before you build on it.
+
+**6. Keeping keys out of the repo.** The Gemini key lives only in a git-ignored .env file and in Render's environment settings. A publish script scans every file for key-shaped strings before each push, and it stopped me once when a test used a realistic fake key, so I made the fake one obviously fake. When a map key ended up pasted into a chat, I never put it in code, treated it as exposed and rotated it. Lesson: assume any key you have shown to anyone is public, and rotate it.
+
+## What I learned
+
+- A graph database earns its place when the question is about paths, not rows. Every one of the three tricks is a path.
+- Keep the agent's power small and enforce it in the tool list, not in a prompt. Exactly one tool writes, and it can only write a note.
+- Shipping is half the work. Deployment, keys, cold starts and a phone that cannot find the server cost me more hours than the detection logic.
 
 ## What I would do next
 
@@ -105,7 +125,9 @@ I built this with AI help. Claude wrote much of the code, tests and documentatio
 ## Try it
 
 - Code: https://github.com/olowolayemogoodness-crypto/ecograph
-- Live demo: [add your Render link]
+- Live demo: https://ecograph-790j.onrender.com
+- Land map dashboard: https://ecograph-790j.onrender.com/dashboard
+- Android app: https://github.com/olowolayemogoodness-crypto/ecograph/releases/latest/download/ecograph.apk
 - Demo video: [add your video link]
 
 The README has a five-step setup. All data is synthetic, and nothing here accuses a real company.

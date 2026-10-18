@@ -360,12 +360,32 @@ footer a{color:var(--lime)}
   </div>
 </section>
 
+<section class="band yellow">
+  <div class="wrap">
+    <span class="tag reveal">06 · Setbacks</span>
+    <h2 class="big reveal">What went wrong,<br>and what it taught me.</h2>
+    <div class="grid2">
+      <div class="card reveal"><span class="k">1</span><h3>The query that never finished</h3><p>My first loop detector asked for any closed walk of three to six sales. On 121 traders it had not finished after two minutes. One property filter, the same credit id on every hop, made it return in under a second and fixed a correctness bug too. Lesson: let the pattern's own definition constrain the traversal.</p></div>
+      <div class="card reveal"><span class="k">2</span><h3>The database would not start on the server</h3><p>The embedded FalkorDB build needs a recent Linux (glibc 2.39 or newer). A Debian 12 image could not run it, so the Docker image had to move to Debian 13. Lesson: read a dependency's platform requirements before picking a base image.</p></div>
+      <div class="card reveal"><span class="k">3</span><h3>The free server fell asleep</h3><p>On Render's free plan the server sleeps when idle and takes up to a minute to wake. My app showed a pulsing dot and nothing else, so it looked broken. I added a clear "Connecting to the server" message and a free uptime monitor that checks the health endpoint every five minutes. My first monitor returned a 404 because I mistyped the URL. Lesson: test the boring path first.</p></div>
+      <div class="card reveal"><span class="k">4</span><h3>The Android app said "can't reach server"</h3><p>A release build defaults to the emulator's address for the host machine, which means nothing on a real phone. The live server address has to be baked in at build time with a Dart define. Lesson: defaults that work on a laptop quietly fail in a user's hand.</p></div>
+      <div class="card reveal"><span class="k">5</span><h3>The map asked for an API key</h3><p>My first map tiles came from a provider that now requires a key, and the map filled with "API KEY REQUIRED" watermarks. I switched to OpenStreetMap tiles, which need none. Lesson: check what a free service really costs before you build on it.</p></div>
+      <div class="card reveal"><span class="k">6</span><h3>Keeping keys out of the repo</h3><p>The Gemini key lives only in a git-ignored .env file and in Render's environment settings. A publish script scans every file for key-shaped strings before each push, and it stopped me once when a test used a realistic fake key, so I made the fake one obviously fake. When a map key ended up pasted into a chat, I never put it in code, treated it as exposed and rotated it. Lesson: assume any key you have shown to anyone is public, and rotate it.</p></div>
+    </div>
+    <h3 class="mid reveal" style="margin-top:40px">What I learned</h3>
+    <ul class="list narrow reveal">
+      <li>A graph database earns its place when the question is about paths, not rows. Every one of the three tricks is a path.</li>
+      <li>Keep the agent's power small and enforce it in the tool list, not in a prompt. Exactly one tool writes, and it can only write a note.</li>
+      <li>Shipping is half the work. Deployment, keys, cold starts and a phone that cannot find the server cost me more hours than the detection logic.</li>
+    </ul>
+  </div>
+</section>
 <section class="band cream">
   <div class="wrap">
-    <span class="tag reveal">06 · The app</span>
+    <span class="tag reveal">07 · The app</span>
     <h2 class="big reveal">One minute,<br>start to finish.</h2>
     <div class="narrow">
-      <p class="reveal">The interface is a Flutter app for iOS, Android and web. You open it and see five cases that need a decision and 27,880 tonnes at risk. Tap <em>Triage every open case</em> and the agent ranks them. Open the top case and you see the graph with the suspicious links in red. Trace one credit from its retirement back to the land. Freeze it, and the History tab records that you agreed with the agent.</p>
+      <p class="reveal">The interface is a Flutter app for iOS, Android and web. On a wide screen it becomes a review console, and a separate <a href="https://ecograph-790j.onrender.com/dashboard">land-map dashboard</a> plots every parcel on a world map, red where two projects claim the same land. You open it and see five cases that need a decision and 27,880 tonnes at risk. Tap <em>Triage every open case</em> and the agent ranks them. Open the top case and you see the graph with the suspicious links in red. Trace one credit from its retirement back to the land. Freeze it, and the History tab records that you agreed with the agent.</p>
     </div>
     <div class="grid3">
       <div class="card reveal" style="background:var(--lime)"><div class="n" style="color:var(--ink)">0.15s</div><p>to scan the whole ledger</p></div>
