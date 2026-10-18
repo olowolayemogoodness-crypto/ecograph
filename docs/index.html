@@ -10,108 +10,189 @@
 <meta property="og:type" content="article">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@400;500;600&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#F3F1EC;--card:#FFFFFF;--ink:#0C111B;--ink2:#4A5565;--ink3:#5E6877;--line:#E3DFD5;
-  --red:#C8321F;--redtint:#FBE9E5;--blue:#2F3FC2;--bluetint:#E8EBFD;--code:#0C111B;--codeink:#D9DDE6;--codeblue:#9DAEFF;--coral:#FF9A8A;
-  --shadow:0 1px 2px rgba(12,17,27,.04),0 12px 32px -12px rgba(12,17,27,.12);
-}
-@media (prefers-color-scheme:dark){
-  :root{--paper:#0C111B;--card:#141B29;--ink:#F3F1EC;--ink2:#B9C3D4;--ink3:#8B95A8;--line:#2C3850;
-  --redtint:#2A1713;--bluetint:#18204A;--code:#070B12;--shadow:0 1px 2px rgba(0,0,0,.3),0 12px 32px -12px rgba(0,0,0,.5);--red:#FF9A8A;--blue:#9DAEFF}
+  --ink:#0E0B2B;       /* midnight: authority, trust */
+  --cream:#FFF6E6;     /* warm paper: easy reading */
+  --red:#FF4B2B;       /* alarm: the problem */
+  --yellow:#FFD23F;    /* attention: look here */
+  --violet:#5B3DF5;    /* intelligence: the agent */
+  --lime:#C6FF3D;      /* go / growth: the fix */
+  --white:#FFFFFF;
+  --r:28px;
+  --pop:5px 6px 0 var(--ink);
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:'Schibsted Grotesk',system-ui,sans-serif;font-size:19px;line-height:1.65;-webkit-font-smoothing:antialiased}
-a{color:var(--blue);text-decoration:none;border-bottom:1px solid currentColor}
-a:hover{opacity:.8}
-.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
-#progress{position:fixed;top:0;left:0;height:4px;width:0;background:var(--red);border-radius:0 4px 4px 0;z-index:50;transition:width .1s}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:'Schibsted Grotesk',system-ui,sans-serif;font-size:19px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:var(--lime);color:var(--ink)}
+a{color:inherit}
+h1,h2,h3{font-family:'Bricolage Grotesque','Schibsted Grotesk',sans-serif;margin:0;font-weight:800;letter-spacing:-.03em;line-height:1}
+.mono{font-family:'JetBrains Mono',monospace}
+code{font-family:'JetBrains Mono',monospace;font-size:.82em;background:var(--ink);color:var(--lime);padding:2px 9px;border-radius:10px;white-space:nowrap}
+#progress{position:fixed;top:0;left:0;height:6px;width:0;background:linear-gradient(90deg,var(--red),var(--yellow),var(--lime));z-index:90;border-radius:0 6px 6px 0}
 
-.bar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px max(20px,calc((100vw - 760px)/2));background:color-mix(in srgb,var(--paper) 86%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.brand{font-weight:800;letter-spacing:-.4px;border:none;color:var(--ink);display:flex;align-items:center;gap:10px}
-.glyph{width:26px;height:26px;border-radius:9px;background:var(--ink);display:grid;place-items:center}
-.glyph i{width:9px;height:9px;border-radius:50%;background:var(--coral);display:block}
-.stats{display:flex;align-items:center;gap:10px}
-.pill{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:15px;font-weight:600;color:var(--ink2);box-shadow:var(--shadow)}
+.ticker{background:var(--red);color:var(--ink);border-bottom:3px solid var(--ink);overflow:hidden;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px;letter-spacing:2px;padding:9px 0}
+.ticker div{display:inline-block;animation:scroll 38s linear infinite}
+.ticker span{margin:0 22px}
+@keyframes scroll{to{transform:translateX(-50%)}}
+
+.bar{position:sticky;top:0;z-index:80;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px max(18px,calc((100vw - 1080px)/2));background:var(--ink);color:var(--cream);border-bottom:3px solid var(--ink)}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;text-decoration:none;letter-spacing:-.02em}
+.glyph{width:30px;height:30px;border-radius:11px;background:var(--lime);display:grid;place-items:center}
+.glyph i{width:11px;height:11px;border-radius:50%;background:var(--ink);display:block}
+.stats{display:flex;gap:10px;align-items:center}
+.pill{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;border:2px solid var(--cream);background:transparent;color:var(--cream);font:600 15px 'Schibsted Grotesk',sans-serif}
 .pill svg{width:18px;height:18px}
-.pill b{color:var(--ink);font-family:'JetBrains Mono',monospace;font-weight:600;min-width:1ch}
+.pill b{font-family:'JetBrains Mono',monospace;font-weight:600;min-width:1ch}
+.pill.like{cursor:pointer;background:var(--yellow);color:var(--ink);border-color:var(--yellow);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.pill.like:hover{transform:scale(1.07) rotate(-2deg)}
+.pill.like svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linejoin:round}
+.pill.like.liked{background:var(--red);border-color:var(--red);color:var(--ink)}
+.pill.like.liked svg{fill:var(--ink)}
 
-header.hero{max-width:760px;margin:0 auto;padding:72px 20px 24px}
-.eyebrow{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:2.5px;color:var(--ink3);text-transform:uppercase;margin:0 0 20px}
-h1{font-size:clamp(40px,7vw,68px);line-height:1.04;letter-spacing:-2.2px;font-weight:800;margin:0 0 24px}
-h1 em{font-style:normal;color:var(--red)}
-.lede{font-size:22px;color:var(--ink2);margin:0 0 28px;line-height:1.5}
-.meta{display:flex;flex-wrap:wrap;gap:10px;font-size:15px}
-.chip{padding:6px 14px;border-radius:999px;background:var(--bluetint);color:var(--blue);font-weight:600;font-size:14px}
-.chip.plain{background:var(--card);color:var(--ink2);border:1px solid var(--line)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.band{position:relative;padding:88px 0;border-bottom:3px solid var(--ink)}
+.band.cream{background:var(--cream)}.band.ink{background:var(--ink);color:var(--cream)}
+.band.red{background:var(--red)}.band.yellow{background:var(--yellow)}
+.band.violet{background:var(--violet);color:var(--white)}.band.lime{background:var(--lime)}
+.narrow{max-width:720px}
+.band p{margin:0 0 20px}
+.tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;padding:7px 16px;border-radius:999px;border:2px solid currentColor;margin:0 0 22px}
+.big{font-size:clamp(38px,6.4vw,76px)}
+.mid{font-size:clamp(32px,4.6vw,54px);margin:0 0 26px}
+.stick{display:inline-block;transform:rotate(-3deg);padding:4px 16px;border:3px solid var(--ink);border-radius:16px;background:var(--yellow);color:var(--ink);box-shadow:var(--pop)}
+.mark{background:linear-gradient(transparent 58%,var(--yellow) 58%);padding:0 4px}
+.ink .mark{background:linear-gradient(transparent 58%,var(--violet) 58%)}
 
-main{max-width:760px;margin:0 auto;padding:8px 20px 40px}
-main h2{font-size:34px;line-height:1.15;letter-spacing:-1px;font-weight:800;margin:64px 0 16px;scroll-margin-top:90px}
-main p{margin:0 0 20px}
-.note{padding:18px 22px;border-radius:24px;background:var(--bluetint);color:var(--ink);font-size:17px;margin:0 0 28px}
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:28px 0}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:var(--shadow)}
-.stat .n{font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:600;letter-spacing:-2px;color:var(--red);line-height:1.1}
-.stat p{margin:8px 0 0;font-size:16px;line-height:1.4;color:var(--ink2)}
-.cards{display:grid;gap:14px;margin:24px 0}
-.cardx{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:20px 24px;box-shadow:var(--shadow);display:flex;gap:18px;align-items:flex-start}
-.cardx .k{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:22px;color:var(--red);min-width:28px}
-.cardx p{margin:0;font-size:17px}
-.cardx strong{display:block;font-size:19px;margin-bottom:2px}
-pre{background:var(--code);color:var(--codeink);border-radius:24px;padding:22px 24px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:14.5px;line-height:1.7;margin:0 0 24px}
-pre .k{color:var(--codeblue)}pre .c{color:#8B95A8}pre .s{color:var(--coral)}
-code{font-family:'JetBrains Mono',monospace;font-size:.84em;background:var(--bluetint);color:var(--blue);padding:2px 8px;border-radius:8px}
-pre code{background:none;color:inherit;padding:0;font-size:inherit}
-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:24px;overflow:hidden;margin:0 0 24px;font-size:17px}
-th,td{padding:12px 18px;text-align:left;border-bottom:1px solid var(--line)}
-th{font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);background:var(--paper)}
-tr:last-child td{border-bottom:none}
-td:last-child{font-family:'JetBrains Mono',monospace;font-weight:600}
-ul,ol{padding-left:24px;margin:0 0 20px}li{margin-bottom:8px}
-.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:stretch;margin:28px 0}
-.flow div.b{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;text-align:center;box-shadow:var(--shadow);font-size:15px;line-height:1.35}
-.flow div.b b{display:block;font-size:18px;margin-bottom:4px}
-.flow div.b.ag{background:var(--blue);color:#fff;border-color:var(--blue)}
-.flow div.b.ag b{color:#fff}
-.flow .ar{align-self:center;font-size:24px;color:var(--ink3)}
-.sources{font-size:14.5px;color:var(--ink3);border-top:1px solid var(--line);padding-top:20px;margin-top:48px;line-height:1.6}
+/* hero */
+.hero{background:var(--ink);color:var(--cream);padding:96px 0 110px;border-bottom:3px solid var(--ink);position:relative;overflow:hidden}
+.hero h1{font-size:clamp(54px,11.5vw,150px);line-height:.92;letter-spacing:-.05em;margin:0 0 30px}
+.hero h1 .r{color:var(--red)}
+.hero h1 .y{color:var(--ink);background:var(--yellow);padding:0 .12em;border-radius:.16em;display:inline-block;transform:rotate(-2.5deg)}
+.hero .lede{font-size:clamp(20px,2.4vw,26px);max-width:640px;margin:0 0 30px;line-height:1.45;color:#E9E3F7}
+.blob{position:absolute;border-radius:50%;pointer-events:none;filter:blur(2px)}
+.b1{width:340px;height:340px;background:var(--violet);right:-90px;top:-70px;opacity:.9}
+.b2{width:180px;height:180px;background:var(--red);right:14%;bottom:-70px}
+.b3{width:90px;height:90px;background:var(--lime);right:30%;top:70px}
+.b1,.b2,.b3{animation:float 9s ease-in-out infinite}.b2{animation-delay:-3s}.b3{animation-delay:-6s}
+@keyframes float{50%{transform:translateY(-22px) scale(1.04)}}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:8px 18px;border-radius:999px;font-weight:700;font-size:15px;border:2px solid var(--cream)}
+.chip.c1{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.chip.c2{background:var(--violet);border-color:var(--violet);color:#fff}
+.chip.c3{background:var(--red);border-color:var(--red);color:var(--ink)}
 
-.endcard{max-width:760px;margin:24px auto 0;padding:0 20px}
-.endcard .inner{background:var(--ink);color:var(--paper);border-radius:32px;padding:40px;text-align:center}
-@media (prefers-color-scheme:dark){.endcard .inner{background:var(--card);color:var(--ink);border:1px solid var(--line)}}
-.endcard h3{font-size:34px;letter-spacing:-1px;margin:0 0 8px;line-height:1.1}
-.endcard p{margin:0 0 24px;opacity:.8;font-size:17px}
-.likebtn{position:relative;display:inline-flex;align-items:center;gap:12px;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:18px;padding:16px 30px;border-radius:999px;background:var(--red);color:#fff;transition:transform .35s cubic-bezier(.34,1.56,.64,1),background .2s;box-shadow:0 10px 24px -10px var(--red)}
-.likebtn:hover{transform:scale(1.05)}
-.likebtn:active{transform:scale(.94)}
-.likebtn svg{width:22px;height:22px;transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
-.likebtn.liked{background:var(--card);color:var(--red);border:2px solid var(--red);box-shadow:none;cursor:default}
-.likebtn.liked svg{fill:var(--red);transform:scale(1.15)}
-.likebtn .cnt{font-family:'JetBrains Mono',monospace;font-weight:600;padding-left:12px;border-left:1px solid currentColor;opacity:.9}
-.pill.like{cursor:pointer}
-.pill.like.liked{color:var(--red);border-color:var(--red)}
-.pill.like.liked svg{fill:var(--red)}
-.pill.like svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
-.pill.like:active svg{transform:scale(.8)}
-.dot{position:fixed;width:10px;height:10px;border-radius:50%;pointer-events:none;z-index:60}
-footer{max-width:760px;margin:40px auto 0;padding:0 20px 64px;font-size:15px;color:var(--ink3);text-align:center}
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+/* stat tiles */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:3px solid var(--ink)}
+.tile{padding:36px 26px 40px;border-right:3px solid var(--ink)}
+.tile:last-child{border-right:none}
+.tile .n{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(46px,6vw,78px);letter-spacing:-.05em;line-height:1}
+.tile p{margin:12px 0 0;font-size:16px;line-height:1.4;font-weight:500}
+.t1{background:var(--red)}.t2{background:var(--yellow)}.t3{background:var(--violet);color:#fff}.t4{background:var(--lime)}
+
+/* cards */
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin:32px 0}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin:32px 0}
+.card{background:var(--white);color:var(--ink);border:3px solid var(--ink);border-radius:var(--r);padding:26px;box-shadow:var(--pop);transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
+.card:hover{transform:translate(-3px,-3px) rotate(-.6deg);box-shadow:8px 9px 0 var(--ink)}
+.card .n{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:54px;letter-spacing:-.05em;line-height:1;color:var(--red)}
+.card p{margin:10px 0 0;font-size:16.5px;line-height:1.45}
+.card h3{font-size:25px;margin:10px 0 8px}
+.card .k{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--ink);color:var(--yellow);font:700 20px 'JetBrains Mono',monospace}
+
+/* code */
+pre{background:#07051B;color:#E9E3F7;border:3px solid var(--lime);border-radius:var(--r);padding:26px;overflow-x:auto;font:500 14.5px/1.75 'JetBrains Mono',monospace;margin:0 0 26px;box-shadow:6px 7px 0 var(--lime)}
+pre .k{color:var(--lime)}pre .s{color:var(--yellow);background:rgba(255,210,63,.16);border-radius:6px;padding:0 4px}pre .c{color:#8F88B8}
+
+/* demo */
+.demo{background:var(--white);border:3px solid var(--ink);border-radius:var(--r);box-shadow:var(--pop);padding:26px;margin:30px 0 8px;color:var(--ink)}
+.demo svg{width:100%;height:auto;display:block}
+.demo .btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+.btn{font:700 16px 'Schibsted Grotesk',sans-serif;border:3px solid var(--ink);border-radius:999px;padding:12px 22px;background:var(--lime);color:var(--ink);cursor:pointer;box-shadow:3px 4px 0 var(--ink);transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:5px 6px 0 var(--ink)}
+.btn:active{transform:translate(2px,3px);box-shadow:0 0 0 var(--ink)}
+.btn:disabled{opacity:.4;cursor:default;transform:none}
+.btn.alt{background:var(--yellow)}.btn.ghost{background:var(--white)}
+.verdict{margin-top:18px;padding:16px 20px;border-radius:20px;border:3px solid var(--ink);font-weight:600;font-size:17px;background:var(--cream);transition:background .3s}
+.verdict.bad{background:var(--red);animation:shake .5s}
+.verdict.good{background:var(--lime)}
+@keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.edge{stroke:var(--ink);stroke-width:5;stroke-linecap:round;stroke-dasharray:300;stroke-dashoffset:300;transition:stroke-dashoffset .6s ease}
+.edge.on{stroke-dashoffset:0}.edge.hot{stroke:var(--red)}
+
+/* score bars */
+.bars{display:grid;gap:14px;margin:30px 0}
+.row{display:grid;grid-template-columns:200px 1fr 60px;align-items:center;gap:16px;font-weight:600}
+.track{height:30px;border:3px solid var(--ink);border-radius:999px;background:var(--white);overflow:hidden}
+.fill{height:100%;width:0;border-radius:999px;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+.row .v{font-family:'JetBrains Mono',monospace}
+.final{margin-top:30px;background:var(--ink);color:var(--cream);border-radius:var(--r);padding:26px;border:3px solid var(--ink);box-shadow:var(--pop)}
+.final .meter{position:relative;height:38px;border-radius:999px;background:#2A2554;overflow:hidden;margin:16px 0 8px}
+.final .meter i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--yellow),var(--red));transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.final .mark85{position:absolute;left:85%;top:0;bottom:0;border-left:3px dashed var(--lime)}
+.final .big2{font-family:'Bricolage Grotesque',sans-serif;font-size:64px;font-weight:800;letter-spacing:-.05em;color:var(--red);line-height:1}
+
+/* agent flow */
+.flow{display:grid;grid-template-columns:1fr 40px 1fr 40px 1fr;gap:6px;align-items:stretch;margin:34px 0}
+.step{border:3px solid var(--ink);border-radius:var(--r);padding:24px;box-shadow:var(--pop);background:var(--white)}
+.step.a{background:var(--violet);color:#fff}.step.y{background:var(--yellow)}
+.step b{display:block;font:800 26px 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em;margin-bottom:6px}
+.step span{font-size:16px;line-height:1.4;display:block}
+.arrow{align-self:center;text-align:center;font-size:34px;font-weight:800}
+.stamp{display:inline-block;transform:rotate(-4deg);border:4px solid var(--red);color:var(--red);border-radius:18px;padding:8px 22px;font:800 clamp(24px,4vw,40px) 'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;background:rgba(255,75,43,.08)}
+
+ul.list{padding:0;list-style:none;margin:0 0 20px}
+ul.list li{padding:14px 22px;margin-bottom:12px;border:3px solid var(--ink);border-radius:20px;background:var(--white);font-weight:500}
+.links a{font-weight:700;border-bottom:3px solid var(--red);text-decoration:none}
+.sources{font-size:14px;line-height:1.6;opacity:.8;margin-top:36px}
+
+/* end */
+.end{background:var(--ink);color:var(--cream);text-align:center;padding:100px 0 90px;position:relative;overflow:hidden}
+.end h2{font-size:clamp(44px,9vw,110px);letter-spacing:-.05em;margin:0 0 14px}
+.end h2 span{color:var(--lime)}
+.end p{opacity:.85;margin:0 auto 34px;max-width:480px}
+.likebtn{position:relative;display:inline-flex;align-items:center;gap:14px;font:800 22px 'Schibsted Grotesk',sans-serif;border:4px solid var(--ink);border-radius:999px;padding:20px 38px;background:var(--lime);color:var(--ink);cursor:pointer;box-shadow:7px 8px 0 var(--red);transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
+.likebtn:hover{transform:translate(-3px,-3px) rotate(-1.5deg);box-shadow:10px 11px 0 var(--red)}
+.likebtn:active{transform:translate(4px,5px);box-shadow:0 0 0 var(--red)}
+.likebtn svg{width:28px;height:28px;fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linejoin:round;transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.likebtn .cnt{font-family:'JetBrains Mono',monospace;padding-left:16px;border-left:3px solid var(--ink)}
+.likebtn.liked{background:var(--red);cursor:default;box-shadow:7px 8px 0 var(--lime)}
+.likebtn.liked svg{fill:var(--ink);transform:scale(1.2)}
+footer{background:var(--ink);color:#B7B0DA;text-align:center;font-size:15px;padding:0 20px 56px}
+footer a{color:var(--lime)}
+.dot{position:fixed;width:12px;height:12px;border-radius:50%;pointer-events:none;z-index:100}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120px);background:var(--ink);color:var(--lime);padding:12px 22px;border-radius:999px;font-weight:700;z-index:99;transition:transform .4s cubic-bezier(.34,1.56,.64,1);border:2px solid var(--lime)}
+.toast.show{transform:translate(-50%,0)}
+
+.reveal{opacity:0;transform:translateY(30px) scale(.98);transition:opacity .6s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
 .reveal.in{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
-@media (max-width:640px){
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.ticker div,.blob{animation:none}html{scroll-behavior:auto}}
+
+@media (max-width:860px){
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .tile:nth-child(2){border-right:none}.tile:nth-child(-n+2){border-bottom:3px solid var(--ink)}
+  .grid3{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}
+}
+@media (max-width:620px){
   body{font-size:18px}
-  .stats-grid{grid-template-columns:1fr}
-  .flow{grid-template-columns:1fr}.flow .ar{transform:rotate(90deg);justify-self:center}
+  .band{padding:64px 0}
+  .grid2{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr 54px}.row .lab{grid-column:1/-1}
   .brand span.t{display:none}
-  main h2{font-size:28px}
-  .endcard .inner{padding:32px 22px}
+  .b1{width:220px;height:220px}
 }
 </style>
 </head>
 <body>
 <div id="progress"></div>
+
+<div class="ticker" aria-hidden="true"><div>
+  <span>ONE TONNE</span><span>★</span><span>CLAIMED TWICE</span><span>★</span><span>7 OF 7 FRAUDS FOUND</span><span>★</span><span>0 FALSE ALARMS</span><span>★</span><span>SCAN IN 0.15 SECONDS</span><span>★</span><span>A PERSON DECIDES</span><span>★</span>
+  <span>ONE TONNE</span><span>★</span><span>CLAIMED TWICE</span><span>★</span><span>7 OF 7 FRAUDS FOUND</span><span>★</span><span>0 FALSE ALARMS</span><span>★</span><span>SCAN IN 0.15 SECONDS</span><span>★</span><span>A PERSON DECIDES</span><span>★</span>
+</div></div>
 
 <div class="bar">
   <a class="brand" href="https://github.com/olowolayemogoodness-crypto/ecograph"><span class="glyph"><i></i></span><span class="t">EcoGraph</span></a>
@@ -122,172 +203,273 @@ footer{max-width:760px;margin:40px auto 0;padding:0 20px 64px;font-size:15px;col
 </div>
 
 <header class="hero">
-  <p class="eyebrow">Graph Hacks 2026 · Track 1 · Agents That Act on Connected Data</p>
-  <h1>One tonne, <em>claimed twice.</em></h1>
-  <p class="lede">I built an AI agent that finds double-counted carbon credits by reasoning over a graph. A person makes every decision.</p>
-  <div class="meta"><span class="chip">FalkorDB</span><span class="chip">Gemini</span><span class="chip">Flutter</span><span class="chip plain">6 min read</span><span class="chip plain">All data synthetic</span></div>
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="wrap" style="position:relative">
+    <span class="tag" style="color:var(--lime)">Graph Hacks 2026 · Track 1</span>
+    <h1>One tonne,<br><span class="r">claimed</span> <span class="y">twice.</span></h1>
+    <p class="lede">I built an AI agent that finds double-counted carbon credits by reasoning over a graph. A person makes every decision.</p>
+    <div class="chips"><span class="chip c1">FalkorDB</span><span class="chip c2">Gemini</span><span class="chip c3">Flutter</span><span class="chip">6 min read</span><span class="chip">All data synthetic</span></div>
+  </div>
 </header>
 
-<main>
-<p class="note reveal">Built for Graph Hacks: Context for AI Agents (WeMakeDevs x FalkorDB). Every name and number from my own ledger is synthetic.</p>
+<section class="tiles">
+  <div class="tile t1 reveal"><div class="n"><span class="count" data-to="84">0</span>%</div><p>of credits from 2,346 projects did not reflect real emission cuts</p></div>
+  <div class="tile t2 reveal"><div class="n"><span class="count" data-to="9.2" data-dec="1">0</span>×</div><p>average over-crediting of cookstove projects</p></div>
+  <div class="tile t3 reveal"><div class="n"><span class="count" data-to="21">0</span></div><p>rainforest projects whose credits gave no climate benefit</p></div>
+  <div class="tile t4 reveal"><div class="n">2 in 3</div><p>auditors on 95 flagged projects missed the flaws</p></div>
+</section>
 
-<p class="reveal">A carbon credit is a promise that one tonne of CO2 stayed out of the air. The promise only means something if it is spent once.</p>
-<p class="reveal">In June 2025, Verra, the largest carbon standard, put an Indian cookstove project on hold after claims of double counting and ineligible credits. The developer rejects the allegations. I do not know who is right, and that is the point: the only way to find out was a manual review, one project at a time.</p>
-<p class="reveal">I wanted to see if a graph and an AI agent could do the first pass, so a human reviewer starts with a short list instead of a pile of spreadsheets. This is how I built <strong>EcoGraph</strong>.</p>
+<section class="band cream">
+  <div class="wrap narrow">
+    <p class="reveal" style="font-size:1.12em"><span class="stick">Built for Graph Hacks</span> &nbsp;(WeMakeDevs x FalkorDB). Every name and number from my own ledger is synthetic.</p>
+    <p class="reveal">A carbon credit is a promise that one tonne of CO2 stayed out of the air. The promise only means something if it is <span class="mark">spent once</span>.</p>
+    <p class="reveal">In June 2025, Verra, the largest carbon standard, put an Indian cookstove project on hold after claims of double counting and ineligible credits. The developer rejects the allegations. I do not know who is right, and that is the point: the only way to find out was a manual review, one project at a time.</p>
+    <p class="reveal">I wanted to see if a graph and an AI agent could do the first pass, so a human reviewer starts with a short list instead of a pile of spreadsheets. This is how I built <strong>EcoGraph</strong>.</p>
+  </div>
+</section>
 
-<h2 class="reveal">The problem is bigger than double counting</h2>
-<p class="reveal">Double counting is one failure inside a larger trust problem. Researchers have measured it:</p>
-<div class="stats-grid">
-  <div class="stat reveal"><div class="n">84%</div><p>of credits from 2,346 projects did not reflect real emission cuts (<i>Nature Communications</i>, 2024)</p></div>
-  <div class="stat reveal"><div class="n">9.2×</div><p>average over-crediting of cookstove projects</p></div>
-  <div class="stat reveal"><div class="n">21</div><p>rainforest projects whose credits gave no climate benefit, in a 2023 investigation</p></div>
-  <div class="stat reveal"><div class="n">2 in 3</div><p>auditors on 95 flagged projects did not catch the flaws</p></div>
-</div>
-<p class="reveal">The market is small today, about 2 billion dollars in 2023, and McKinsey and Morgan Stanley project it could reach 50 billion by 2030. In June 2023 the US CFTC publicly asked for whistleblower tips on carbon fraud, including "improperly counting credits." Regulators are already worried. Most checks still look at one project at a time, and double counting lives between projects.</p>
+<section class="band red">
+  <div class="wrap">
+    <span class="tag reveal">01 · The problem</span>
+    <h2 class="big reveal">It is bigger than<br>double counting.</h2>
+    <div class="grid2">
+      <div class="card reveal"><div class="n">84%</div><p>of credits from 2,346 projects did not reflect real emission cuts. <i>Nature Communications</i>, 2024.</p></div>
+      <div class="card reveal"><div class="n">9.2×</div><p>average over-crediting of cookstove projects.</p></div>
+      <div class="card reveal"><div class="n">21</div><p>rainforest projects whose credits gave no climate benefit, in a 2023 investigation.</p></div>
+      <div class="card reveal"><div class="n">2 in 3</div><p>auditors did not catch the flaws on 95 flagged projects.</p></div>
+    </div>
+    <div class="narrow">
+      <p class="reveal" style="font-weight:600;font-size:1.05em">The market is small today, about 2 billion dollars in 2023, and McKinsey and Morgan Stanley project it could reach 50 billion by 2030. In June 2023 the US CFTC publicly asked for whistleblower tips on carbon fraud, including "improperly counting credits."</p>
+      <p class="reveal" style="font-weight:600;font-size:1.05em">Regulators are already worried. Most checks still look at one project at a time, and double counting lives <u>between</u> projects.</p>
+    </div>
+  </div>
+</section>
 
-<h2 class="reveal">Three ways to count a tonne twice</h2>
-<div class="cards">
-  <div class="cardx reveal"><span class="k">1</span><p><strong>Same land, two projects</strong>Two active projects claim the same parcel, sometimes on different registries.</p></div>
-  <div class="cardx reveal"><span class="k">2</span><p><strong>One credit, two buyers</strong>A credit is retired (claimed as an offset) by more than one company.</p></div>
-  <div class="cardx reveal"><span class="k">3</span><p><strong>A circle of sales</strong>A credit is sold from holder to holder until it comes back to one it already passed through. Nobody gains a tonne, but the trading volume looks healthy.</p></div>
-</div>
-<p class="reveal">None of these is a row in a table. Each is a <em>path</em> through the ledger. That is why I reached for a graph database.</p>
+<section class="band yellow">
+  <div class="wrap">
+    <span class="tag reveal">02 · The tricks</span>
+    <h2 class="big reveal">Three ways to<br>count a tonne twice.</h2>
+    <div class="grid3">
+      <div class="card reveal"><span class="k">1</span><h3>Same land, two projects</h3><p>Two active projects claim the same parcel, sometimes on different registries.</p></div>
+      <div class="card reveal"><span class="k">2</span><h3>One credit, two buyers</h3><p>A credit is retired (claimed as an offset) by more than one company.</p></div>
+      <div class="card reveal"><span class="k">3</span><h3>A circle of sales</h3><p>A credit is sold from holder to holder until it comes back to one it already passed through. Nobody gains a tonne, but volume looks healthy.</p></div>
+    </div>
+    <div class="narrow"><p class="reveal" style="font-weight:600">None of these is a row in a table. Each is a <em>path</em> through the ledger. That is why I reached for a graph database.</p></div>
 
-<h2 class="reveal">The ledger as a graph</h2>
-<pre class="reveal">(Project)-[:COVERS]-&gt;(LandParcel)        (Project)-[:REGISTERED_ON]-&gt;(Registry)
+    <div class="demo reveal" id="demo">
+      <div class="mono" style="font-size:13px;letter-spacing:2px;font-weight:600;color:var(--violet)">TRY IT · RETIRE THE SAME CREDIT TWICE</div>
+      <svg viewBox="0 0 640 270" role="img" aria-label="A credit connected to two buyers who both retired it">
+        <line id="e1" class="edge" x1="320" y1="92" x2="130" y2="200"/>
+        <line id="e2" class="edge" x1="320" y1="92" x2="510" y2="200"/>
+        <circle cx="320" cy="62" r="52" fill="#C6FF3D" stroke="#0E0B2B" stroke-width="4"/>
+        <text x="320" y="58" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="17" fill="#0E0B2B">CR-00694</text>
+        <text x="320" y="80" text-anchor="middle" font-family="JetBrains Mono" font-size="14" fill="#0E0B2B">190 tonnes</text>
+        <g id="nA"><rect x="40" y="200" width="180" height="56" rx="28" fill="#fff" stroke="#0E0B2B" stroke-width="4"/><text x="130" y="235" text-anchor="middle" font-family="Schibsted Grotesk" font-weight="700" font-size="18" fill="#0E0B2B">Company A</text></g>
+        <g id="nB"><rect x="420" y="200" width="180" height="56" rx="28" fill="#fff" stroke="#0E0B2B" stroke-width="4"/><text x="510" y="235" text-anchor="middle" font-family="Schibsted Grotesk" font-weight="700" font-size="18" fill="#0E0B2B">Company B</text></g>
+      </svg>
+      <div class="btns">
+        <button class="btn" id="rA">Company A retires it</button>
+        <button class="btn alt" id="rB">Company B retires it</button>
+        <button class="btn ghost" id="rReset">Reset</button>
+      </div>
+      <div class="verdict" id="verdict">One credit, nobody has claimed it yet. Pick a company.</div>
+    </div>
+  </div>
+</section>
+
+<section class="band ink">
+  <div class="wrap">
+    <span class="tag reveal" style="color:var(--lime)">03 · The graph</span>
+    <h2 class="big reveal">The ledger,<br>as a <span class="mark">graph</span>.</h2>
+    <pre class="reveal">(Project)-[:COVERS]-&gt;(LandParcel)        (Project)-[:REGISTERED_ON]-&gt;(Registry)
 (Credit)-[:ISSUED_FOR]-&gt;(Project)        (Credit)-[:RETIRED_BY {day, claim}]-&gt;(Buyer)
 (Buyer)-[:SOLD_TO {credit, day, price}]-&gt;(Buyer)</pre>
-<p class="reveal">I generated a synthetic ledger with a fixed seed: 1,900 nodes and 4,125 edges (1,634 credits, 121 buyers, 41 projects, 60 parcels and 3 registries), stored in <strong>FalkorDB</strong>. Then I planted 7 frauds in it and added 6 look-alike decoys that must <em>not</em> be flagged, such as neighbouring parcels and a five-hop honest resale chain.</p>
-<p class="reveal">Overlapping land is a two-hop pattern, <code>(p1)-[:COVERS]-&gt;(lp)&lt;-[:COVERS]-(p2)</code>. A double retirement is a count over <code>RETIRED_BY</code>. The circle is the interesting one.</p>
-
-<h2 class="reveal">The query that never finished</h2>
-<p class="reveal">My first loop detector asked for any closed walk of three to six sales. On a network of 121 traders it explored every sale path there is, and it had not finished after two minutes.</p>
-<p class="reveal">The fix was one property filter. A wash trade is <em>one credit</em> going round, so every hop has to carry the same credit id:</p>
-<pre class="reveal"><span class="k">MATCH</span> ()-[x:SOLD_TO]-&gt;()
+    <div class="narrow">
+      <p class="reveal">I generated a synthetic ledger with a fixed seed: 1,900 nodes and 4,125 edges (1,634 credits, 121 buyers, 41 projects, 60 parcels and 3 registries), stored in <strong style="color:var(--lime)">FalkorDB</strong>. Then I planted 7 frauds in it and added 6 look-alike decoys that must <em>not</em> be flagged, such as neighbouring parcels and a five-hop honest resale chain.</p>
+      <p class="reveal">Overlapping land is a two-hop pattern, <code>(p1)-[:COVERS]-&gt;(lp)&lt;-[:COVERS]-(p2)</code>. A double retirement is a count over <code>RETIRED_BY</code>. The circle is the interesting one.</p>
+    </div>
+    <h3 class="mid reveal" style="margin-top:56px">The query that <span style="color:var(--red)">never finished</span>.</h3>
+    <div class="narrow">
+      <p class="reveal">My first loop detector asked for any closed walk of three to six sales. On a network of 121 traders it explored every sale path there is, and it had not finished after two minutes.</p>
+      <p class="reveal">The fix was one property filter. A wash trade is <em>one credit</em> going round, so every hop has to carry the same credit id:</p>
+    </div>
+    <pre class="reveal"><span class="k">MATCH</span> ()-[x:SOLD_TO]-&gt;()
 <span class="k">WITH</span> x.credit <span class="k">AS</span> cid, count(x) <span class="k">AS</span> hops <span class="k">WHERE</span> hops &gt;= 3
 <span class="k">MATCH</span> p = (b:Buyer)-[:SOLD_TO*3..6 <span class="s">{credit: cid}</span>]-&gt;(b)
 <span class="k">WHERE</span> all(n <span class="k">IN</span> nodes(p) <span class="k">WHERE</span> b.id &lt;= n.id)
 <span class="k">RETURN</span> cid, [n <span class="k">IN</span> nodes(p) | n.id] <span class="k">AS</span> ring, [e <span class="k">IN</span> relationships(p) | e.day] <span class="k">AS</span> days</pre>
-<p class="reveal">With <code>{credit: cid}</code> the traversal only follows the sales of one credit, and the query returns in well under a second. It also fixed a correctness problem. Without the filter, three brokers who each pass a <em>different</em> credit to the next one look like a ring. That is ordinary trading, not a wash trade.</p>
-
-<h2 class="reveal">From seven alerts to five cases</h2>
-<p class="reveal">Seven findings is a bad inbox if some of them are really one story. I run a connected-components algorithm (<code>algo.WCC</code> in FalkorDB) over the findings and the projects and credits they touch. The seven findings become five cases. A double retirement, a loop and a land overlap around the same project become <strong>one</strong> scheme.</p>
-<p class="reveal">Each case is scored from named signals, combined as <code>1 - Π(1 - weight)</code>:</p>
-<table class="reveal">
-  <tr><th>Signal</th><th>Weight</th></tr>
-  <tr><td>double retirement</td><td>0.90</td></tr>
-  <tr><td>registry duplicate</td><td>0.80</td></tr>
-  <tr><td>overlap</td><td>0.60</td></tr>
-  <tr><td>trading loop</td><td>0.55</td></tr>
-  <tr><td>no audit on file (never raises a case alone)</td><td>0.15</td></tr>
-</table>
-<p class="reveal">The top case has four signals pointing at one project: <code>1 - (0.10)(0.40)(0.45)(0.85) = 0.985</code>. The app says on the same screen that this is a rule of thumb, not a probability. I would rather a reviewer trust a number a little less than trust it a lot for no reason.</p>
-
-<h2 class="reveal">The agent, and what it cannot do</h2>
-<div class="flow reveal">
-  <div class="b"><b>FalkorDB</b>the graph: projects, land, credits, buyers</div><span class="ar">→</span>
-  <div class="b ag"><b>Gemini + 11 tools</b>asks Cypher questions, ranks cases</div><span class="ar">→</span>
-  <div class="b"><b>You</b>freeze, refer or dismiss</div>
-</div>
-<p class="reveal">The agent reaches the graph only through eleven MCP tools: the detectors, a credit tracer, the clustering, a betweenness ranking, the case list, the audit log, a read-only Cypher tool, and one tool that writes a note. Every read tool returns its rows and the exact query that produced them, so the app shows the working next to the answer.</p>
-<p class="reveal">Ask it to triage the open cases and it reads each case's signals, then records a recommendation (freeze, refer or dismiss, with a one-sentence reason) as a <code>Proposal</code> node using the eleventh tool, <code>propose_action</code>.</p>
-<p class="reveal">That is all it can write. <strong>It cannot freeze anything.</strong> A person freezes, refers or dismisses on a screen that lists exactly which credits are affected, and the decision goes back into the graph with what the agent had proposed. Afterwards you can see whether the reviewer agreed. The rule is enforced by the tool list, not by trusting a prompt, and a test checks that exactly one tool can write and that a proposal never touches a credit.</p>
-<p class="reveal">The agent runs on Gemini in my demo. The same loop works with Claude or any OpenAI-compatible model.</p>
-
-<h2 class="reveal">The app</h2>
-<p class="reveal">The interface is a Flutter app for iOS, Android and web. You open it and see five cases that need a decision and 27,880 tonnes at risk. Tap <em>Triage every open case</em> and the agent ranks them. Open the top case and you see the graph with the suspicious links in red. Trace one credit from its retirement back to the land. Freeze it, and the History tab records that you agreed with the agent.</p>
-<p class="reveal">A scan of the whole ledger takes about 0.15 seconds. On the synthetic data the detectors found 7 of 7 planted frauds with 0 false alarms on the 6 decoys. Because I planted the frauds myself, this shows the queries do what they claim. It says nothing about accuracy on a real registry, whose data is much messier.</p>
-
-<h2 class="reveal">What I would do next</h2>
-<ul class="reveal">
-  <li>Replace the synthetic ledger with public registry data.</li>
-  <li>Scan every new issuance, sale and retirement as it happens, instead of re-running a full scan.</li>
-  <li>Match land by geometry instead of parcel ids, so overlap means "the polygons intersect."</li>
-</ul>
-
-<h2 class="reveal">Built with AI, openly</h2>
-<p class="reveal">I built this with AI help. Claude wrote much of the code, tests and documentation under my direction, and I reviewed and ran it. The running product uses a language model only for the Ask agent. Detection, scoring and every decision are ordinary code over FalkorDB, covered by 34 tests.</p>
-
-<h2 class="reveal">Try it</h2>
-<ul class="reveal">
-  <li>Code: <a href="https://github.com/olowolayemogoodness-crypto/ecograph">github.com/olowolayemogoodness-crypto/ecograph</a></li>
-  <li>Live demo: <a href="LIVE_DEMO_URL">LIVE_DEMO_URL</a></li>
-  <li>Demo video: <a href="VIDEO_URL">VIDEO_URL</a></li>
-</ul>
-<p class="reveal">The README has a five-step setup. All data is synthetic, and nothing here accuses a real company.</p>
-
-<p class="sources">Sources: Probst et al., <i>Nature Communications</i>, 2024. Gill-Wiehl et al., <i>Nature Sustainability</i>, 2024. Guardian, Die Zeit and SourceMaterial, January 2023. Coglianese and Giles, SSRN, 2025. Phillips &amp; Cohen on the CFTC, June 2023 (market figures from McKinsey and Morgan Stanley). Carbon Pulse, 12 June and 7 July 2025.</p>
-</main>
-
-<section class="endcard reveal">
-  <div class="inner">
-    <h3>Count every tonne once.</h3>
-    <p>If this was useful, a like helps more than you think.</p>
-    <button class="likebtn" id="likeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.7 4.5 6.4 4.5c2.2 0 3.8 1.2 5.6 3.3 1.8-2.1 3.4-3.3 5.6-3.3 3.7 0 5.5 3.9 4 7.3C19.5 16.4 12 21 12 21z"/></svg><span id="likeLabel">Like</span><span class="cnt" id="likesBottom">–</span></button>
+    <div class="narrow"><p class="reveal">With <code>{credit: cid}</code> the traversal only follows the sales of one credit, and the query returns in well under a second. It also fixed a correctness problem. Without the filter, three brokers who each pass a <em>different</em> credit to the next one look like a ring. That is ordinary trading, not a wash trade.</p></div>
   </div>
 </section>
 
+<section class="band violet">
+  <div class="wrap">
+    <span class="tag reveal">04 · The score</span>
+    <h2 class="big reveal">Seven alerts.<br>Five cases.</h2>
+    <div class="narrow">
+      <p class="reveal">Seven findings is a bad inbox if some of them are really one story. I run a connected-components algorithm (<code>algo.WCC</code> in FalkorDB) over the findings and the projects and credits they touch. A double retirement, a loop and a land overlap around the same project become <strong>one</strong> scheme.</p>
+      <p class="reveal">Each case is scored from named signals, combined as <code>1 - Π(1 - weight)</code>:</p>
+    </div>
+    <div class="bars" id="bars">
+      <div class="row reveal"><span class="lab">double retirement</span><div class="track"><div class="fill" data-w="90" style="background:var(--red)"></div></div><span class="v">0.90</span></div>
+      <div class="row reveal"><span class="lab">registry duplicate</span><div class="track"><div class="fill" data-w="80" style="background:var(--yellow)"></div></div><span class="v">0.80</span></div>
+      <div class="row reveal"><span class="lab">overlap</span><div class="track"><div class="fill" data-w="60" style="background:var(--lime)"></div></div><span class="v">0.60</span></div>
+      <div class="row reveal"><span class="lab">trading loop</span><div class="track"><div class="fill" data-w="55" style="background:var(--cream)"></div></div><span class="v">0.55</span></div>
+      <div class="row reveal"><span class="lab">no audit (never alone)</span><div class="track"><div class="fill" data-w="15" style="background:#9B8CFF"></div></div><span class="v">0.15</span></div>
+    </div>
+    <div class="final reveal" id="final">
+      <div class="mono" style="font-size:13px;letter-spacing:2px;color:var(--lime)">TOP CASE · FOUR SIGNALS ON ONE PROJECT</div>
+      <div class="meter"><i data-w="98.5"></i><span class="mark85"></span></div>
+      <div style="display:flex;justify-content:space-between;font:600 13px 'JetBrains Mono',monospace;color:#B7B0DA"><span>0</span><span style="margin-left:auto;margin-right:9%">freeze line 0.85</span><span>1</span></div>
+      <div class="big2">0.985</div>
+      <p style="margin:8px 0 0;font-size:16px;color:#E9E3F7"><code>1 - (0.10)(0.40)(0.45)(0.85)</code> &nbsp;The app says on the same screen that this is a rule of thumb, not a probability. I would rather a reviewer trust a number a little less than trust it a lot for no reason.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band lime">
+  <div class="wrap">
+    <span class="tag reveal">05 · The agent</span>
+    <h2 class="big reveal">It recommends.<br>You decide.</h2>
+    <div class="flow reveal">
+      <div class="step"><b>FalkorDB</b><span>the graph: projects, land, credits, buyers and every link</span></div><div class="arrow">→</div>
+      <div class="step a"><b>Gemini + 11 tools</b><span>asks Cypher questions, ranks cases, writes one note each</span></div><div class="arrow">→</div>
+      <div class="step y"><b>You</b><span>freeze, refer or dismiss, on a screen that lists the credits</span></div>
+    </div>
+    <div class="narrow">
+      <p class="reveal">The agent reaches the graph only through eleven MCP tools: the detectors, a credit tracer, the clustering, a betweenness ranking, the case list, the audit log, a read-only Cypher tool, and one tool that writes a note. Every read tool returns its rows and the exact query that produced them, so the app shows the working next to the answer.</p>
+      <p class="reveal">Ask it to triage the open cases and it reads each case's signals, then records a recommendation (freeze, refer or dismiss, with a one-sentence reason) as a <code>Proposal</code> node using the eleventh tool, <code>propose_action</code>.</p>
+    </div>
+    <p class="reveal" style="text-align:center;margin:36px 0"><span class="stamp">IT CANNOT FREEZE ANYTHING</span></p>
+    <div class="narrow">
+      <p class="reveal">That is all it can write. A person freezes, refers or dismisses, and the decision goes back into the graph with what the agent had proposed. Afterwards you can see whether the reviewer agreed. The rule is enforced by the tool list, not by trusting a prompt, and a test checks that exactly one tool can write and that a proposal never touches a credit.</p>
+      <p class="reveal">The agent runs on Gemini in my demo. The same loop works with Claude or any OpenAI-compatible model.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band cream">
+  <div class="wrap">
+    <span class="tag reveal">06 · The app</span>
+    <h2 class="big reveal">One minute,<br>start to finish.</h2>
+    <div class="narrow">
+      <p class="reveal">The interface is a Flutter app for iOS, Android and web. You open it and see five cases that need a decision and 27,880 tonnes at risk. Tap <em>Triage every open case</em> and the agent ranks them. Open the top case and you see the graph with the suspicious links in red. Trace one credit from its retirement back to the land. Freeze it, and the History tab records that you agreed with the agent.</p>
+    </div>
+    <div class="grid3">
+      <div class="card reveal" style="background:var(--lime)"><div class="n" style="color:var(--ink)">0.15s</div><p>to scan the whole ledger</p></div>
+      <div class="card reveal" style="background:var(--yellow)"><div class="n" style="color:var(--ink)">7 / 7</div><p>planted frauds found</p></div>
+      <div class="card reveal" style="background:var(--red)"><div class="n" style="color:var(--ink)">0</div><p>false alarms on 6 decoys</p></div>
+    </div>
+    <div class="narrow">
+      <p class="reveal">Because I planted the frauds myself, this shows the queries do what they claim. It says nothing about accuracy on a real registry, whose data is much messier.</p>
+    </div>
+
+    <h3 class="mid reveal" style="margin-top:60px">What I would do next</h3>
+    <ul class="list narrow reveal">
+      <li>Replace the synthetic ledger with public registry data.</li>
+      <li>Scan every new issuance, sale and retirement as it happens, instead of re-running a full scan.</li>
+      <li>Match land by geometry instead of parcel ids, so overlap means "the polygons intersect."</li>
+    </ul>
+
+    <h3 class="mid reveal" style="margin-top:60px">Built with AI, openly</h3>
+    <div class="narrow"><p class="reveal">I built this with AI help. Claude wrote much of the code, tests and documentation under my direction, and I reviewed and ran it. The running product uses a language model only for the Ask agent. Detection, scoring and every decision are ordinary code over FalkorDB, covered by 34 tests.</p></div>
+
+    <h3 class="mid reveal" style="margin-top:60px">Try it</h3>
+    <ul class="list narrow links reveal">
+      <li>Code: <a href="https://github.com/olowolayemogoodness-crypto/ecograph">github.com/olowolayemogoodness-crypto/ecograph</a></li>
+      <li>Live demo: <a href="LIVE_DEMO_URL">LIVE_DEMO_URL</a></li>
+      <li>Demo video: <a href="VIDEO_URL">VIDEO_URL</a></li>
+    </ul>
+    <div class="narrow"><p class="reveal">The README has a five-step setup. All data is synthetic, and nothing here accuses a real company.</p>
+    <p class="sources reveal">Sources: Probst et al., <i>Nature Communications</i>, 2024. Gill-Wiehl et al., <i>Nature Sustainability</i>, 2024. Guardian, Die Zeit and SourceMaterial, January 2023. Coglianese and Giles, SSRN, 2025. Phillips &amp; Cohen on the CFTC, June 2023 (market figures from McKinsey and Morgan Stanley). Carbon Pulse, 12 June and 7 July 2025.</p></div>
+  </div>
+</section>
+
+<section class="end">
+  <div class="blob b1" style="opacity:.6"></div>
+  <div class="wrap" style="position:relative">
+    <h2 class="reveal">Count every<br><span>tonne once.</span></h2>
+    <p class="reveal">If this was useful, a like helps more than you think.</p>
+    <button class="likebtn reveal" id="likeBtn"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.7 4.5 6.4 4.5c2.2 0 3.8 1.2 5.6 3.3 1.8-2.1 3.4-3.3 5.6-3.3 3.7 0 5.5 3.9 4 7.3C19.5 16.4 12 21 12 21z"/></svg><span id="likeLabel">Like</span><span class="cnt" id="likesBottom">–</span></button>
+  </div>
+</section>
 <footer>Built by Goodey for Graph Hacks 2026 · <a href="https://github.com/olowolayemogoodness-crypto/ecograph">View the code</a></footer>
+<div class="toast" id="toast">Thank you!</div>
 
 <script>
 (function(){
   var NS='ecograph-goodey-blog', API='https://abacus.jasoncameron.dev';
   var $=function(id){return document.getElementById(id)};
+  var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
   var store={get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
   var seen={get:function(k){try{return sessionStorage.getItem(k)}catch(e){return null}},set:function(k,v){try{sessionStorage.setItem(k,v)}catch(e){}}};
-
   function fmt(n){return n>=1000?(n/1000).toFixed(n>=10000?0:1).replace(/\.0$/,'')+'k':String(n)}
   function countUp(el,to){
-    if(matchMedia('(prefers-reduced-motion:reduce)').matches||to<2){el.textContent=fmt(to);return}
-    var t0=performance.now(),d=700;
+    if(reduce||to<2){el.textContent=fmt(to);return}
+    var t0=performance.now(),d=800;
     (function tick(t){var p=Math.min(1,(t-t0)/d),e=1-Math.pow(1-p,3);el.textContent=fmt(Math.round(to*e));if(p<1)requestAnimationFrame(tick)})(t0);
   }
-  function call(path){
-    return fetch(API+path).then(function(r){
-      if(r.status===404)return{value:0};
-      if(!r.ok)throw new Error(r.status);
-      return r.json();
-    });
-  }
+  function call(path){return fetch(API+path).then(function(r){if(r.status===404)return{value:0};if(!r.ok)throw new Error(r.status);return r.json()})}
   function setLikes(n){countUp($('likesTop'),n);countUp($('likesBottom'),n)}
-
-  var viewsPath=seen.get('viewed')?'/get/':'/hit/';
-  call(viewsPath+NS+'/views').then(function(d){seen.set('viewed','1');countUp($('views'),d.value)}).catch(function(){$('views').textContent='–'});
+  var vp=seen.get('viewed')?'/get/':'/hit/';
+  call(vp+NS+'/views').then(function(d){seen.set('viewed','1');countUp($('views'),d.value)}).catch(function(){$('views').textContent='–'});
   call('/get/'+NS+'/likes').then(function(d){setLikes(d.value)}).catch(function(){setLikes(0)});
 
-  function markLiked(){
-    ['likeBtn','likeTop'].forEach(function(id){$(id).classList.add('liked')});
-    $('likeLabel').textContent='Thank you';
-  }
+  function markLiked(){['likeBtn','likeTop'].forEach(function(id){$(id).classList.add('liked')});$('likeLabel').textContent='Thank you'}
   if(store.get('liked-'+NS)==='1')markLiked();
-
+  function toast(t){var el=$('toast');el.textContent=t;el.classList.add('show');setTimeout(function(){el.classList.remove('show')},2200)}
   function burst(x,y){
-    var colors=['#C8321F','#FF9A8A','#2F3FC2','#E2B866'];
-    for(var i=0;i<14;i++){
-      var d=document.createElement('span');d.className='dot';
-      d.style.left=x+'px';d.style.top=y+'px';d.style.background=colors[i%colors.length];
+    var colors=['#FF4B2B','#FFD23F','#5B3DF5','#C6FF3D','#FFF6E6'];
+    for(var i=0;i<22;i++){
+      var d=document.createElement('span');d.className='dot';d.style.left=x+'px';d.style.top=y+'px';d.style.background=colors[i%colors.length];
       document.body.appendChild(d);
-      var a=Math.PI*2*i/14,r=50+Math.random()*50;
-      d.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:'translate('+Math.cos(a)*r+'px,'+Math.sin(a)*r+'px) scale(0)',opacity:0}],{duration:700+Math.random()*300,easing:'cubic-bezier(.2,.8,.2,1)'}).onfinish=(function(el){return function(){el.remove()}})(d);
+      var a=Math.PI*2*i/22,r=70+Math.random()*90;
+      d.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:'translate('+Math.cos(a)*r+'px,'+Math.sin(a)*r+'px) scale(0)',opacity:0}],{duration:700+Math.random()*400,easing:'cubic-bezier(.2,.8,.2,1)'}).onfinish=(function(el){return function(){el.remove()}})(d);
     }
   }
   function like(ev){
-    if(store.get('liked-'+NS)==='1')return;
-    store.set('liked-'+NS,'1');markLiked();
-    var r=ev.currentTarget.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2);
-    var cur=parseInt($('likesBottom').textContent.replace('k','000'),10)||0;
-    setLikes(cur+1);
+    if(store.get('liked-'+NS)==='1'){toast('You already liked this. Thank you!');return}
+    store.set('liked-'+NS,'1');markLiked();toast('Thank you!');
+    var r=ev.currentTarget.getBoundingClientRect();if(!reduce)burst(r.left+r.width/2,r.top+r.height/2);
+    var cur=parseInt($('likesBottom').textContent.replace('k','000'),10)||0;setLikes(cur+1);
     call('/hit/'+NS+'/likes').then(function(d){setLikes(d.value)}).catch(function(){});
   }
-  $('likeBtn').addEventListener('click',like);
-  $('likeTop').addEventListener('click',like);
+  $('likeBtn').addEventListener('click',like);$('likeTop').addEventListener('click',like);
 
   var bar=$('progress');
-  function prog(){var h=document.documentElement,s=h.scrollTop,m=h.scrollHeight-h.clientHeight;bar.style.width=(m>0?s/m*100:0)+'%'}
+  function prog(){var h=document.documentElement,m=h.scrollHeight-h.clientHeight;bar.style.width=(m>0?h.scrollTop/m*100:0)+'%'}
   addEventListener('scroll',prog,{passive:true});prog();
 
-  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.08});
+  function runCount(el){
+    var to=parseFloat(el.dataset.to),dec=parseInt(el.dataset.dec||'0',10);
+    if(reduce){el.textContent=to.toFixed(dec);return}
+    var t0=performance.now(),d=1100;
+    (function tick(t){var p=Math.min(1,(t-t0)/d),e=1-Math.pow(1-p,3);el.textContent=(to*e).toFixed(dec);if(p<1)requestAnimationFrame(tick)})(t0);
+  }
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){
+    if(!e.isIntersecting)return;
+    var t=e.target;t.classList.add('in');io.unobserve(t);
+    t.querySelectorAll('.count').forEach(runCount);
+    t.querySelectorAll('[data-w]').forEach(function(f){if(f.tagName==='I'){f.style.width=f.dataset.w+'%'}else{f.style.width=f.dataset.w+'%'}});
+    if(t.matches('[data-w]'))t.style.width=t.dataset.w+'%';
+  })},{threshold:.15});
   document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+
+  var got={A:false,B:false};
+  function render(){
+    $('e1').classList.toggle('on',got.A);$('e2').classList.toggle('on',got.B);
+    var both=got.A&&got.B;
+    $('e1').classList.toggle('hot',both);$('e2').classList.toggle('hot',both);
+    var v=$('verdict');v.className='verdict';
+    if(both){v.classList.add('bad');v.innerHTML='<b>DOUBLE COUNT.</b> The same 190 tonnes are claimed by two companies. In EcoGraph one query finds this: credits with more than one <code>RETIRED_BY</code> link.'}
+    else if(got.A||got.B){v.classList.add('good');v.textContent='Retired once by Company '+(got.A?'A':'B')+'. That is how it should work. Now let the other company claim it too.'}
+    else v.textContent='One credit, nobody has claimed it yet. Pick a company.';
+    $('rA').disabled=got.A;$('rB').disabled=got.B;
+  }
+  $('rA').addEventListener('click',function(){got.A=true;render()});
+  $('rB').addEventListener('click',function(){got.B=true;render()});
+  $('rReset').addEventListener('click',function(){got={A:false,B:false};render()});
+  render();
 })();
 </script>
 </body>
