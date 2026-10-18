@@ -7,7 +7,6 @@ import 'eco_api.dart';
 import 'panels.dart';
 import 'theme.dart';
 
-/// The signed-in app: five tabs on a phone, the three-pane review console on a wide screen.
 class AppShell extends StatefulWidget {
   final EcoApi api;
   const AppShell({Key? key, required this.api}) : super(key: key);
@@ -122,7 +121,6 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-// ---- bottom navigation ----------------------------------------------------------------------------
 class EcoNav extends StatelessWidget {
   final int index;
   final ValueChanged<int> onTap;
@@ -181,7 +179,6 @@ Widget _pageTitle(String t, {Widget? trailing}) => Padding(
       ]),
     );
 
-// ---- Home -----------------------------------------------------------------------------------------
 class HomeTab extends StatelessWidget {
   final List<CaseSummary> cases;
   final Map<String, dynamic> stats;
@@ -276,7 +273,6 @@ class HomeTab extends StatelessWidget {
   }
 }
 
-// ---- Cases ----------------------------------------------------------------------------------------
 class CasesTab extends StatelessWidget {
   final List<CaseSummary> cases;
   final ValueChanged<CaseSummary> onOpen;
@@ -318,7 +314,6 @@ Widget _pageTitleInline(String t, String sub) => Padding(
       ]),
     );
 
-// ---- Ask ------------------------------------------------------------------------------------------
 class _AskTab extends StatelessWidget {
   final EcoApi api;
   final String? auto;
@@ -331,7 +326,6 @@ class _AskTab extends StatelessWidget {
       ]);
 }
 
-// ---- Trace ----------------------------------------------------------------------------------------
 class TraceTab extends StatefulWidget {
   final EcoApi api;
   const TraceTab({Key? key, required this.api}) : super(key: key);
@@ -532,7 +526,6 @@ class _TraceTabState extends State<TraceTab> with AutomaticKeepAliveClientMixin 
   }
 }
 
-// ---- History --------------------------------------------------------------------------------------
 class HistoryTab extends StatefulWidget {
   final EcoApi api;
   final List<CaseSummary> cases;
@@ -660,7 +653,6 @@ class _HistoryTabState extends State<HistoryTab> {
   }
 }
 
-// ---- Settings -------------------------------------------------------------------------------------
 class SettingsScreen extends StatefulWidget {
   final EcoApi api;
   const SettingsScreen({Key? key, required this.api}) : super(key: key);

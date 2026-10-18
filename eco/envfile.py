@@ -1,11 +1,9 @@
-"""Reads KEY=VALUE lines from a .env file into the environment. Variables that are already set win. Standard library only."""
 import os
 import re
 from pathlib import Path
 
 
 def load_env(path=None):
-    """Load ./.env (or the one next to the package). Blank values are skipped, so `KEY=` lines in .env.example do nothing."""
     files = [Path(path)] if path else [Path.cwd() / ".env", Path(__file__).resolve().parent.parent / ".env"]
     for f in files:
         if not f.is_file():
@@ -22,7 +20,7 @@ def load_env(path=None):
             if len(val) > 1 and val[0] in "\"'" and val[-1] == val[0]:
                 val = val[1:-1]
             else:
-                val = re.split(r"(?:^|\s)#", val, maxsplit=1)[0].strip()   # a trailing comment, or a value that is only a comment
+                val = re.split(r"(?:^|\s)#", val, maxsplit=1)[0].strip()
             if key and val and key not in os.environ:
                 os.environ[key] = val
         return f

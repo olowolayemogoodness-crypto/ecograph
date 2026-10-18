@@ -4,7 +4,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY eco ./eco
-# The built Flutter web app (see DEPLOY.md). Without an index.html in it, the container serves the API only.
 COPY web_app ./web_app
 ENV PORT=8000 PYTHONUNBUFFERED=1
 EXPOSE 8000

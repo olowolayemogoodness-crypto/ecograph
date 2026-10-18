@@ -6,19 +6,16 @@ import 'eco_api.dart';
 import 'panels.dart';
 import 'theme.dart';
 
-/// At or above this width the app becomes the three-pane review console (rail, case, why/query/ask).
 const double consoleBreakpoint = 1320;
 
 BoxDecoration cardDeco() => BoxDecoration(color: Tone.paper, borderRadius: BorderRadius.circular(24), border: Border.all(color: Tone.line));
 
 int numOf(Map<String, dynamic> m, String k) => m[k] is num ? (m[k] as num).toInt() : 0;
 
-/// "4 credits · 1,140 t · P-07, P-19"
 String caseMeta(CaseSummary c) {
   final credits = c.creditsAtRisk == 1 ? '1 credit' : '${c.creditsAtRisk} credits';
   return '$credits · ${fmtInt(c.tonnesAtRisk)} t · ${c.projects.join(', ')}';
 }
-
 
 class CaseCard extends StatelessWidget {
   final CaseSummary c;
@@ -60,8 +57,6 @@ class CaseCard extends StatelessWidget {
   }
 }
 
-// ---- The wide review console -----------------------------------------------------------------------
-/// Three panes: the case rail, the selected case with its graph, and Why / Query / Ask with the decision bar.
 class ReviewConsole extends StatefulWidget {
   final EcoApi api;
   final Map<String, dynamic> stats;
@@ -92,7 +87,7 @@ class _ReviewConsoleState extends State<ReviewConsole> with SingleTickerProvider
     super.didUpdateWidget(old);
     final id = selectedId;
     if (id != null && !widget.cases.any((c) => c.id == id)) {
-      // the selected case vanished (the ledger was rebuilt): fall back to the top of the queue
+
       selectedId = _firstId();
       detail = null;
       detailError = null;
@@ -153,7 +148,6 @@ class _ReviewConsoleState extends State<ReviewConsole> with SingleTickerProvider
     await widget.onChanged();
   }
 
-  /// The agent saved a proposal, maybe on several cases: reload the rail and the open case so the notes show up.
   Future<void> _afterAgentWrote() async {
     await widget.onChanged();
     final id = selectedId;
@@ -203,7 +197,6 @@ class _ReviewConsoleState extends State<ReviewConsole> with SingleTickerProvider
         ),
       );
 
-  // -- top bar --
   Widget _header() {
     final o = widget.stats;
     Widget stat(String big, String label, {Color color = Colors.white}) => Row(
@@ -250,7 +243,6 @@ class _ReviewConsoleState extends State<ReviewConsole> with SingleTickerProvider
     );
   }
 
-  // -- left rail --
   Widget _rail() {
     final open = [for (final c in widget.cases) if (c.status == 'open') c];
     final done = [for (final c in widget.cases) if (c.status != 'open') c];
@@ -305,7 +297,6 @@ class _ReviewConsoleState extends State<ReviewConsole> with SingleTickerProvider
     );
   }
 
-  // -- centre: the case --
   Widget _center() {
     final id = selectedId;
     if (id == null) {
@@ -355,7 +346,6 @@ class _ReviewConsoleState extends State<ReviewConsole> with SingleTickerProvider
     );
   }
 
-  // -- right: why / query / ask + decision --
   Widget _right() {
     final c = detail;
     Widget scroll(Widget child) => ListView(padding: EdgeInsets.fromLTRB(18, 16, 18, 16), children: [child]);

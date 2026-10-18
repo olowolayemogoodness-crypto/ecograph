@@ -9,8 +9,6 @@ import 'theme.dart';
 
 const _kindOrder = ['project', 'parcel', 'registry', 'credit', 'buyer'];
 
-// ---- Evidence --------------------------------------------------------------------------------------
-/// The graph, its key, and what the graph shows. Returns a Column, so the caller supplies the scrolling.
 class EvidencePanel extends StatelessWidget {
   final CaseDetail c;
   final double aspect;
@@ -65,7 +63,6 @@ class EvidencePanel extends StatelessWidget {
   }
 }
 
-// ---- Why -------------------------------------------------------------------------------------------
 class WhyPanel extends StatelessWidget {
   final CaseDetail c;
   const WhyPanel({Key? key, required this.c}) : super(key: key);
@@ -138,13 +135,11 @@ class _SignalRow extends StatelessWidget {
   }
 }
 
-// ---- Query -----------------------------------------------------------------------------------------
 const _cypherKeywords = {
   'MATCH', 'OPTIONAL', 'WITH', 'WHERE', 'RETURN', 'ORDER', 'BY', 'LIMIT', 'UNWIND', 'CALL', 'YIELD', 'AS', 'AND', 'OR', 'NOT', 'IN',
   'DISTINCT', 'CREATE', 'SET', 'MERGE', 'DESC', 'ASC', 'IS', 'NULL', 'EXISTS',
 };
 
-/// Colours the Cypher: keywords green, :Labels blue, numbers orange.
 List<InlineSpan> highlightCypher(String src) {
   final re = RegExp(r':[A-Za-z_][A-Za-z0-9_]*|[A-Za-z_][A-Za-z0-9_]*|\d+(?:\.\d+)?');
   final spans = <InlineSpan>[];
@@ -250,7 +245,6 @@ class _QueryCard extends StatelessWidget {
       );
 }
 
-// ---- Ask -------------------------------------------------------------------------------------------
 class _Turn {
   final String q;
   AskResult? result;
@@ -259,13 +253,12 @@ class _Turn {
   _Turn(this.q);
 }
 
-/// Ask Claude about this case. It answers only from graph queries and lists the ones it used.
 class AskPanel extends StatefulWidget {
   final EcoApi api;
   final String? caseId;
-  /// Sent as the first question as soon as the panel opens (used by the Home screen shortcut).
+
   final String? autoAsk;
-  /// Called after the agent saved a proposal, so the screen can reload and show it.
+
   final Future<void> Function()? onWrote;
   const AskPanel({Key? key, required this.api, required this.caseId, this.onWrote, this.autoAsk}) : super(key: key);
   @override
@@ -316,7 +309,7 @@ class _AskPanelState extends State<AskPanel> with AutomaticKeepAliveClientMixin 
         });
       }
     } catch (_) {
-      // the case view shows its own error if the server is down
+
     }
   }
 
@@ -350,7 +343,7 @@ class _AskPanelState extends State<AskPanel> with AutomaticKeepAliveClientMixin 
       try {
         await widget.onWrote?.call();
       } catch (_) {
-        // the proposal is saved either way; the next reload will show it
+
       }
     }
     _toEnd();
@@ -507,10 +500,8 @@ class _AskPanelState extends State<AskPanel> with AutomaticKeepAliveClientMixin 
       );
 }
 
-// ---- Decisions -------------------------------------------------------------------------------------
 Color actionColor(String action) => action == 'freeze' ? Tone.vermilion : action == 'refer' ? Tone.amber : Tone.ink;
 
-/// One line for the queue: the agent has proposed something on this case.
 class ProposalTag extends StatelessWidget {
   final Proposal p;
   const ProposalTag({Key? key, required this.p}) : super(key: key);
@@ -526,8 +517,6 @@ class ProposalTag extends StatelessWidget {
   }
 }
 
-/// What the agent recommended on an open case, with its reason. Hidden when it has proposed nothing.
-/// It is only a note: the buttons in the decision bar are the only way anything happens.
 class ProposalBanner extends StatelessWidget {
   final CaseSummary c;
   final EdgeInsets margin;
@@ -555,7 +544,6 @@ class ProposalBanner extends StatelessWidget {
   }
 }
 
-/// Freeze / Refer / Dismiss. The suggested action is the filled one. Once decided, shows what was recorded.
 class DecisionBar extends StatelessWidget {
   final CaseDetail c;
   final void Function(String action) onDecide;
@@ -605,7 +593,6 @@ class DecisionBar extends StatelessWidget {
   }
 }
 
-/// Bottom sheet that asks the person to confirm. Returns the note (maybe empty) on confirm, null on cancel.
 Future<String?> showDecisionSheet(BuildContext context, CaseDetail c, String action) => showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -729,7 +716,6 @@ class _DecisionSheetState extends State<_DecisionSheet> {
   }
 }
 
-/// Opens the confirm sheet and, if confirmed, records the decision. Returns null if cancelled or it failed (an error is shown).
 Future<DecisionResult?> runDecision(BuildContext context, EcoApi api, CaseDetail c, String action) async {
   final note = await showDecisionSheet(context, c, action);
   if (note == null) return null;
@@ -743,7 +729,6 @@ Future<DecisionResult?> runDecision(BuildContext context, EcoApi api, CaseDetail
   }
 }
 
-/// Asks first, then rebuilds the demo ledger for everyone using this server. Returns true when it was reset.
 Future<bool> confirmReset(BuildContext context, EcoApi api) async {
   final ok = await showDialog<bool>(
     context: context,

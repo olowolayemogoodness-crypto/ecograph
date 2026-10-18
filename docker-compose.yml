@@ -1,4 +1,3 @@
-# docker compose up --build        ->  API on http://localhost:8000, FalkorDB on :6379
 services:
   falkordb:
     image: falkordb/falkordb:latest

@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+APP="$ROOT/app"
+PY="$ROOT/.venv/bin/python"
+say() { printf '\n[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
+
+say "STEP 1 of 7: which Flutter"
+flutter --version 2>&1 | head -4
+
+cd "$APP" || { say "STOPPED: no app folder"; exit 1; }
+
+if [ -d web ]; then
+  say "STEP 2 of 7: the web platform is already there"
+else
+  say "STEP 2 of 7: adding the web platform"
+  flutter create . --platforms=web --project-name ecograph_app 2>&1 | tail -6
+  [ -f web/index.html ] && perl -pi -e 's#<title>ecograph_app</title>#<title>EcoGraph</title>#; s#content="ecograph_app"#content="EcoGraph"#' web/index.html
+fi
+
+say "STEP 3 of 7: flutter pub get"
+flutter pub get 2>&1 | tail -12
+
+say "STEP 4 of 7: flutter analyze"
+flutter analyze --no-pub > "$ROOT/analyze_report.txt" 2>&1
+cat "$ROOT/analyze_report.txt"
+ERRS=$(grep -cE '^[[:space:]]*error[[:space:]]+[•-]' "$ROOT/analyze_report.txt")
+say "analyze errors: $ERRS"
+
+say "STEP 5 of 7: flutter test"
+flutter test --no-pub 2>&1 | tail -12
+
+if [ "$ERRS" -gt 0 ]; then
+  say "STOPPED: fix the analyze errors above first (nothing was built)."
+  exit 1
+fi
+
+say "STEP 6 of 7: building the web app (this is the slow step)"
+flutter build web --release --no-pub 2>&1 | tail -14
+if [ ! -f build/web/index.html ]; then
+  say "STOPPED: the web build did not produce build/web/index.html"
+  exit 1
+fi
+rm -rf "$ROOT/web_app" && mkdir -p "$ROOT/web_app" && cp -R build/web/. "$ROOT/web_app/"
+echo "web app copied to web_app/ ($(ls "$ROOT/web_app" | wc -l | tr -d ' ') items)"
+
+say "STEP 7 of 7: backend tests, then restart the API on port 8000"
+cd "$ROOT" || exit 1
+"$PY" -m pip install -q -r requirements.txt 2>&1 | tail -3
+"$PY" -m pytest -q 2>&1 | tail -3
+pkill -f "python -m eco.server" 2>/dev/null
+sleep 1
+nohup "$PY" -m eco.server 8000 > "$ROOT/server.log" 2>&1 &
+sleep 7
+curl -s -m 10 http://127.0.0.1:8000/api/health
+echo
+say "ALL DONE"

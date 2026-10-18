@@ -1,20 +1,7 @@
-"""The graph queries and algorithms the agent uses, plus the scan, scoring and case logic.
-
-Every detector is plain OpenCypher (or a FalkorDB graph algorithm) run against the ledger, and returns
-the rows together with a `_trace` entry holding the exact query, so the app can show its working.
-
-Detectors:     find_overlapping_claims, find_registry_duplicates, find_double_retirements, find_trading_loops
-Investigation: trace_credit_upstream, rank_intermediaries (algo.betweenness), cluster_suspicious (algo.WCC)
-Cases:         scan() writes (:Finding)-[:INVOLVES]->(...) and groups findings into cases with an explainable score.
-Actions:       decide() is the only write a person can trigger. propose() is the only write the agent has, and it is
-               only a note attached to a case: it freezes nothing, refers nothing and closes nothing.
-"""
 import datetime
 import hashlib
-import math
-import random
 
-# ---- Cypher ---------------------------------------------------------------------------------------------
+
 Q_PAIRS = """MATCH (p1:Project)-[:COVERS]->(lp:LandParcel)<-[:COVERS]-(p2:Project)
 WHERE p1.id < p2.id AND p1.status = 'ACTIVE' AND p2.status = 'ACTIVE'
 MATCH (p1)-[:REGISTERED_ON]->(r1:Registry), (p2)-[:REGISTERED_ON]->(r2:Registry)
@@ -30,8 +17,8 @@ WHERE size(claims) > 1
 MATCH (c)-[:ISSUED_FOR]->(p:Project)
 RETURN c.id, c.tonnes, p.id, claims"""
 
-# Only a credit that changes hands three or more times can come back to a holder, so the traversal is
-# restricted to those and follows that one credit's sales (the {credit: cid} filter keeps it fast).
+
+# {credit: cid} keeps the path on one credit. Without it the query explores every sale path and never finishes.
 Q_LOOPS = """MATCH ()-[x:SOLD_TO]->()
 WITH x.credit AS cid, count(x) AS hops WHERE hops >= 3
 MATCH p = (b:Buyer)-[:SOLD_TO*3..6 {credit: cid}]->(b)
@@ -69,6 +56,7 @@ Q_CREDITS = "MATCH (c:Credit) WHERE c.id IN $ids RETURN c.id, c.tonnes, c.frozen
 
 Q_OVERVIEW = """MATCH (n) RETURN labels(n)[0], count(n)"""
 
+# score = 1 - product(1 - weight): several independent signals raise the score
 WEIGHTS = {"double_retirement": 0.90, "registry_duplicate": 0.80, "overlap": 0.60, "loop": 0.55, "no_audit": 0.15}
 WHY = {
     "double_retirement": "The same credit was retired by two different buyers.",
@@ -98,7 +86,6 @@ def _rows(g, q, params=None):
 
 
 def _clean(v):
-    """FalkorDB returns maps as OrderedDicts; make rows JSON friendly."""
     if isinstance(v, dict):
         return {k: _clean(x) for k, x in v.items()}
     if isinstance(v, (list, tuple)):
@@ -106,7 +93,6 @@ def _clean(v):
     return v
 
 
-# ---- detectors ---------------------------------------------------------------------------------------
 def _pairs(g):
     out = []
     for p1, p2, r1, r2, shared, n1, n2 in _rows(g, Q_PAIRS):
@@ -116,28 +102,24 @@ def _pairs(g):
 
 
 def find_overlapping_claims(g):
-    """Pairs of active projects that claim some of the same land (excluding exact duplicates across registries)."""
     rows = [p for p in _pairs(g) if not (p["same_land"] and p["reg_a"] != p["reg_b"])]
     return {"overlaps": rows, "count": len(rows),
             "_trace": _trace("find_overlapping_claims", Q_PAIRS, detail=f"{len(rows)} overlapping pair(s)")}
 
 
 def find_registry_duplicates(g):
-    """Projects on different registries that cover exactly the same land."""
     rows = [p for p in _pairs(g) if p["same_land"] and p["reg_a"] != p["reg_b"]]
     return {"duplicates": rows, "count": len(rows),
             "_trace": _trace("find_registry_duplicates", Q_PAIRS, detail=f"{len(rows)} duplicate listing(s)")}
 
 
 def find_double_retirements(g):
-    """Credits retired by more than one buyer."""
     rows = [{"credit": c, "tonnes": t, "project": p, "claims": _clean(cl)} for c, t, p, cl in _rows(g, Q_DOUBLE_RETIRE)]
     return {"double_retirements": rows, "count": len(rows),
             "_trace": _trace("find_double_retirements", Q_DOUBLE_RETIRE, detail=f"{len(rows)} credit(s) retired twice")}
 
 
 def find_trading_loops(g):
-    """Credits sold around a circle of 3 to 6 holders. A swap of two different credits is not a loop."""
     raw = _rows(g, Q_LOOPS)
     loops = {}
     for cid, ring, days in raw:
@@ -152,7 +134,6 @@ def find_trading_loops(g):
 
 
 def trace_credit_upstream(g, credit_id):
-    """Walk from a credit back to the land: retirement, every sale, the developer, the project, its registry, audit and parcels."""
     head = _rows(g, Q_UPSTREAM_HEAD, {"id": credit_id})
     if not head:
         return {"error": f"No credit {credit_id}."}
@@ -170,7 +151,7 @@ def trace_credit_upstream(g, credit_id):
     holders = [dev] + [s["to"] for s in sales]
     if len(set(holders)) < len(holders):
         flags.append("A holder appears twice in the chain of sales.")
-    hops = len(sales) + (1 if retired else 0) + 2          # sales, retirement, project->developer, project->land
+    hops = len(sales) + (1 if retired else 0) + 2
     return {"credit": cid, "tonnes": tonnes, "status": status, "project": {"id": pid, "name": pname, "country": country,
             "parcels": parcels, "registry": registry, "audit": ({"auditor": auditor, "date": adate} if auditor else None),
             "developer": dev}, "sales": sales, "retired": retired, "rival_claims": rivals, "flags": flags, "hops": hops,
@@ -179,8 +160,6 @@ def trace_credit_upstream(g, credit_id):
 
 
 def rank_intermediaries(g, k=8):
-    """Betweenness centrality over the sale network: which buyers sit on the most trade routes. Each is joined
-    to the findings it appears in, so a busy honest broker can be told apart from one in a loop."""
     rows = _rows(g, Q_BETWEENNESS, {"k": int(k)})
     flagged = {h for r in find_trading_loops(g)["loops"] for h in r["holders"]}
     flagged |= {c["buyer"] for r in find_double_retirements(g)["double_retirements"] for c in r["claims"]}
@@ -191,8 +170,6 @@ def rank_intermediaries(g, k=8):
 
 
 def cluster_suspicious(g):
-    """Weakly connected components over (Finding)-[:INVOLVES]->(Project|Credit): findings that share a project or
-    credit fall in one cluster, i.e. one scheme rather than coincidences. Needs scan() to have run."""
     comp = {}
     for nid, labels, cc in _rows(g, Q_WCC):
         comp.setdefault(cc, {"findings": [], "projects": [], "credits": []})
@@ -205,7 +182,6 @@ def cluster_suspicious(g):
             "_trace": _trace("cluster_suspicious", Q_WCC, detail=f"{len(clusters)} cluster(s), largest has {max((len(c['findings']) for c in clusters), default=0)} finding(s)")}
 
 
-# ---- scan: findings -> clusters -> cases ---------------------------------------------------------------
 def _fid(ftype, key):
     return f"{ftype}:{key}"
 
@@ -217,95 +193,50 @@ def _noisy_or(ws):
     return round(1 - p, 3)
 
 
-def _layout(nodes, edges, seed=3, iters=220):
-    """Small deterministic spring layout, positions scaled to 0..1, so the app can draw the evidence without a graph library."""
-    rnd = random.Random(seed)
-    ids = [n["id"] for n in nodes]
-    pos = {i: [rnd.random(), rnd.random()] for i in ids}
-    k = math.sqrt(1.0 / max(len(ids), 1))
-    for t in range(iters):
-        disp = {i: [0.0, 0.0] for i in ids}
-        for i in ids:
-            for j in ids:
-                if i < j:
-                    dx, dy = pos[i][0] - pos[j][0], pos[i][1] - pos[j][1]
-                    d = math.hypot(dx, dy) or 0.01
-                    f = k * k / d
-                    for who, s in ((i, 1), (j, -1)):
-                        disp[who][0] += s * dx / d * f
-                        disp[who][1] += s * dy / d * f
-        for e in edges:
-            if e["a"] in pos and e["b"] in pos:
-                dx, dy = pos[e["a"]][0] - pos[e["b"]][0], pos[e["a"]][1] - pos[e["b"]][1]
-                d = math.hypot(dx, dy) or 0.01
-                f = d * d / k
-                for who, s in ((e["a"], -1), (e["b"], 1)):
-                    disp[who][0] += s * dx / d * f
-                    disp[who][1] += s * dy / d * f
-        temp = 0.1 * (1 - t / iters) + 0.002
-        for i in ids:
-            dl = math.hypot(*disp[i]) or 0.01
-            pos[i][0] += disp[i][0] / dl * min(dl, temp)
-            pos[i][1] += disp[i][1] / dl * min(dl, temp)
-    _normalise(pos)
-    _separate(pos)
+def _layout(nodes, edges):
+    return _layered(nodes, edges)
+
+
+LAYER_ORDER = ["registry", "parcel", "project", "credit", "buyer"]
+
+
+def _layered(nodes, edges, per_row=4):
+    rank = {k: i for i, k in enumerate(LAYER_ORDER)}
+    by_kind = {}
     for n in nodes:
-        n["x"], n["y"] = round(pos[n["id"]][0], 3), round(pos[n["id"]][1], 3)
+        by_kind.setdefault(n["kind"], []).append(n["id"])
+    nbr = {n["id"]: set() for n in nodes}
+    for e in edges:
+        if e["a"] in nbr and e["b"] in nbr:
+            nbr[e["a"]].add(e["b"])
+            nbr[e["b"]].add(e["a"])
+    layers = []
+    for kind in sorted(by_kind, key=lambda k: rank.get(k, 99)):
+        ids = sorted(by_kind[kind])
+        for i in range(0, len(ids), per_row):
+            layers.append(ids[i:i + per_row])
+    x = {}
+    for row in layers:
+        for i, nid in enumerate(row):
+            x[nid] = (i + 0.5) / len(row)
+    for sweep in range(6):
+        order = range(len(layers)) if sweep % 2 == 0 else range(len(layers) - 1, -1, -1)
+        for li in order:
+            row = layers[li]
+            def bary(nid):
+                xs = [x[m] for m in nbr[nid] if m in x and m not in row]
+                return sum(xs) / len(xs) if xs else x[nid]
+            row.sort(key=lambda nid: (round(bary(nid), 4), nid))
+            step = min(0.3, 0.8 / max(len(row) - 1, 1))
+            for i, nid in enumerate(row):
+                x[nid] = 0.5 + (i - (len(row) - 1) / 2) * step
+    ys = {}
+    for li, row in enumerate(layers):
+        for nid in row:
+            ys[nid] = 0.5 if len(layers) == 1 else 0.1 + 0.8 * li / (len(layers) - 1)
+    for n in nodes:
+        n["x"], n["y"] = round(x[n["id"]], 3), round(ys[n["id"]], 3)
     return nodes
-
-
-# A node plus its two label lines needs roughly this much room, as a share of the drawing area.
-BOX_W, BOX_H = 0.30, 0.19
-
-
-def _normalise(pos):
-    xs, ys = [p[0] for p in pos.values()], [p[1] for p in pos.values()]
-    x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
-    for p in pos.values():
-        p[0] = 0.08 + 0.84 * (p[0] - x0) / ((x1 - x0) or 1)
-        p[1] = 0.08 + 0.84 * (p[1] - y0) / ((y1 - y0) or 1)
-
-
-def _box(n):
-    k = min(1.0, math.sqrt(9.0 / max(n, 1)))
-    return BOX_W * k, BOX_H * k
-
-
-def _crowding(pos):
-    """How many pairs of nodes sit closer than their label boxes allow (0 = nothing overlaps)."""
-    ids = sorted(pos)
-    bw, bh = _box(len(ids))
-    return sum(1 for a in range(len(ids)) for b in range(a + 1, len(ids))
-               if abs(pos[ids[a]][0] - pos[ids[b]][0]) < bw * 0.92 and abs(pos[ids[a]][1] - pos[ids[b]][1]) < bh * 0.92)
-
-
-def _separate(pos, rounds=140):
-    """Push apart any two nodes whose label boxes would overlap, then stretch back to fill the area. Deterministic."""
-    ids = sorted(pos)
-    bw, bh = _box(len(ids))
-    for _ in range(rounds):
-        moved = False
-        for a in range(len(ids)):
-            for b in range(a + 1, len(ids)):
-                pa, pb = pos[ids[a]], pos[ids[b]]
-                dx, dy = pb[0] - pa[0], pb[1] - pa[1]
-                nx, ny = abs(dx) / bw, abs(dy) / bh
-                if nx < 1 and ny < 1:
-                    moved = True
-                    # leave along the axis that is already further apart (in box units), so labels do not stack
-                    if nx >= ny:
-                        push = (1 - nx) * bw / 2 + 0.002
-                        sx = 1 if dx >= 0 else -1
-                        pa[0] -= sx * push
-                        pb[0] += sx * push
-                    else:
-                        push = (1 - ny) * bh / 2 + 0.002
-                        sy = 1 if dy >= 0 else -1
-                        pa[1] -= sy * push
-                        pb[1] += sy * push
-        _normalise(pos)
-        if not moved:
-            break
 
 
 def _node(nodes, nid, kind, label, sub="", flag=False):
@@ -316,7 +247,6 @@ def _node(nodes, nid, kind, label, sub="", flag=False):
 
 
 def _findings(g):
-    """Run the four detectors and turn each hit into a finding with its own small evidence graph."""
     out, trace = [], []
     ov = find_overlapping_claims(g); trace.append(ov.pop("_trace"))
     dup = find_registry_duplicates(g); trace.append(dup.pop("_trace"))
@@ -379,7 +309,7 @@ def _findings(g):
         for c in r["credits"]:
             if c in pro:
                 _node(nodes, pro[c], "project", pro[c])
-        for pid in projs:   # how the credits entered the circle: the developer's first sale
+        for pid in projs:
             entry = next((b for c in r["credits"] if pro.get(c) == pid for a, b, d in trades.get(c, []) if a.startswith("DEV-")), None)
             if entry:
                 edges.append({"a": pid, "b": entry, "rel": "SOLD_VIA", "label": "first sale", "flag": True})
@@ -415,7 +345,6 @@ def _band(score):
 
 
 def scan(g):
-    """Run every detector, store the findings in the graph, cluster them and score each cluster as a case."""
     findings, trace = _findings(g)
     _write_findings(g, findings)
     cl = cluster_suspicious(g); trace.append(cl.pop("_trace"))
@@ -433,7 +362,7 @@ def scan(g):
         signals.sort(key=lambda s: -s["weight"])
         score = _noisy_or([s["weight"] for s in signals])
         credits = sorted({x for f in fs for x in f["credits"]})
-        # at risk: the credits named in the findings, or, for land claims, the project's credits not yet retired
+
         risky = _rows(g, Q_CREDITS, {"ids": credits}) if credits else _rows(g, Q_AT_RISK, {"pids": projects})
         freezable = [(i, t) for i, t, fz in risky]
         frozen_n = sum(1 for _, _, fz in risky if fz)
@@ -448,7 +377,7 @@ def scan(g):
             if k not in seen:
                 seen[k] = e; uniq.append(e)
             elif e.get("flag"):
-                seen[k]["flag"] = True          # the same link can appear in two findings
+                seen[k]["flag"] = True
         for e in uniq:
             e.setdefault("flag", False)
         types = [f["type"] for f in fs]
@@ -466,16 +395,12 @@ def scan(g):
     return {"cases": cases, "findings": len(findings), "trace": trace}
 
 
-# ---- decisions (a person) and proposals (the agent) -----------------------------------------------------
 def proposals(g):
-    """Pending agent proposals by case id (the newest per case). Notes for a person: nothing here touches a credit."""
     rows = _rows(g, "MATCH (p:Proposal {status: 'pending'}) RETURN p.id, p.case, p.action, p.rationale, p.at ORDER BY p.at")
     return {r[1]: {"id": r[0], "action": r[2], "rationale": r[3], "by": "agent", "at": r[4]} for r in rows}
 
 
 def propose(g, case, action, rationale):
-    """The agent's only write: a recommendation attached to a case, for a person to accept or override.
-    It changes no credit and closes no case. A newer proposal replaces the pending one for the same case."""
     if action not in ACTIONS:
         raise ValueError("action must be freeze, refer or dismiss")
     why = " ".join(str(rationale or "").split())[:400]
@@ -499,8 +424,6 @@ def decisions(g):
 
 
 def decide(g, case, action, note=""):
-    """Record a person's decision on a case. freeze: mark the case's at-risk credits frozen (they keep their status, and cannot be sold or retired). refer: ask the registries
-    to resolve. dismiss: close as a false alarm. Everything is logged as an AuditLog node attached to the case."""
     if action not in ACTIONS:
         raise ValueError("action must be freeze, refer or dismiss")
     status = {"freeze": "frozen", "refer": "referred", "dismiss": "dismissed"}[action]
@@ -509,7 +432,7 @@ def decide(g, case, action, note=""):
             {"id": case["id"], "s": status, "n": (note or "")[:300], "t": now})
     pending = _rows(g, "MATCH (p:Proposal {case: $c, status: 'pending'}) RETURN p.action", {"c": case["id"]})
     proposed = pending[-1][0] if pending else ""
-    if pending:                                  # the person's decision settles the agent's proposal either way
+    if pending:
         g.query("MATCH (p:Proposal {case: $c, status: 'pending'}) SET p.status = $s, p.resolved_at = $t",
                 {"c": case["id"], "s": "accepted" if proposed == action else "overridden", "t": now})
     frozen = 0
@@ -530,8 +453,6 @@ Q_ACTIONS = ("MATCH (l:AuditLog)-[:RECORDS]->(k:Case) "
 
 
 def list_actions(g):
-    """Decisions a person has already made (with what the agent had proposed, if anything) and the proposals still waiting.
-    Check before recommending or proposing something already done."""
     rows = _rows(g, Q_ACTIONS)
     waiting = proposals(g)
     return {"actions": [{"log": a, "case": b, "action": c, "at": d, "credits_frozen": e, "by": f, "note": n, "proposed": pr or ""}
@@ -541,7 +462,6 @@ def list_actions(g):
 
 
 def run_cypher(g, query, limit=40):
-    """Read-only escape hatch. FalkorDB's read-only query path rejects writes."""
     try:
         rs = g.ro_query(query)
     except Exception as e:

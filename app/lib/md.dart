@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'theme.dart';
 
-/// A small Markdown renderer for the agent's answers: headings, bullets, numbered lists, **bold**, *italic* and `code`.
 class MdText extends StatelessWidget {
   final String text;
   final double size;
@@ -48,7 +47,6 @@ class MdText extends StatelessWidget {
         ]),
       );
 
-  /// Inline styles: **bold**, *italic*, `code`.
   Widget _rich(String s, TextStyle base) {
     final spans = <InlineSpan>[];
     final re = RegExp(r'\*\*(.+?)\*\*|`([^`]+)`|\*(.+?)\*|_(.+?)_');

@@ -16,4 +16,4 @@ set_key.sh
 publish.sh
 go_report.txt
 analyze_report.txt
-*.old
+*.tgz

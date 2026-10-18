@@ -7,7 +7,7 @@
 An AI agent that finds carbon credits counted twice, by reasoning over a **FalkorDB** graph.
 A person makes every decision.
 
-[Live demo](#links) · [Demo video](#links) · [Blog post](#links) · [How it works](#how-it-works) · [Run it](#run-it)
+[Live demo](#links) · [Demo video](#links) · [Blog post](#links) · [How it works](#how-it-works) · [Run it](#set-it-up)
 
 Built for **Graph Hacks: Context for AI Agents** (WeMakeDevs x FalkorDB) · **Track 1: Agents That Act on Connected Data**
 
@@ -65,47 +65,92 @@ One Flutter codebase for iOS, Android and web, with a soft, rounded interface. O
 
 A case has **Evidence / Why / Query / Ask** tabs and a decision bar. In a window 1320 px wide or more it becomes a three-pane review console. The design system lives in `app/lib/theme.dart`.
 
-## Run it
+## Set it up
 
-**Backend, no setup** (embedded FalkorDB). It needs Python 3.12 or newer, and on an Apple Silicon Mac the embedded database needs macOS 15 or newer; on anything older use the Docker option below.
+You need **Python 3.12 or newer**. Flutter is only needed if you want to change or run the phone app; the web app is already built and included.
+
+### 1. Get the code
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
+git clone https://github.com/olowolayemogoodness-crypto/ecograph.git
+cd ecograph
+```
+
+### 2. Start the backend
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python -m eco.server 8000            # http://localhost:8000/api/health
-python -m pytest -q                  # 34 tests
-python -m eco.evaluate               # detector precision/recall against the planted frauds
+python -m eco.server 8000
 ```
-**With a FalkorDB server** (Docker): `docker compose up --build` (API on :8000, FalkorDB on :6379).
-Or run only the database, `docker run -p 6379:6379 falkordb/falkordb`, and start the API with `FALKORDB_HOST=localhost`.
 
-**Turn on the Ask agent.** Copy `.env.example` to `.env` (the server reads it; it is git-ignored) and set one of:
+Open http://localhost:8000. You should see the app, already loaded with the demo ledger. `http://localhost:8000/api/health` should answer `"ok": true`.
 
-| Option | Settings |
-|---|---|
-| Claude | `ANTHROPIC_API_KEY` (model: `ECO_MODEL`, default `claude-sonnet-5-5`) |
-| Gemini (free tier) | `ECO_LLM_PROVIDER=gemini` and `ECO_LLM_API_KEY` from aistudio.google.com/apikey (default model `gemini-3.8-flash`) |
-| Groq (free tier, small per-minute token cap) | `ECO_LLM_PROVIDER=groq` and `ECO_LLM_API_KEY` from console.groq.com/keys (default `llama-3.3-70b-versatile`) |
-| Any OpenAI-compatible API | `ECO_LLM_API_KEY`, `ECO_LLM_BASE_URL`, `ECO_LLM_MODEL` |
+The database is FalkorDB running inside the Python process, so there is nothing else to install. (On an Apple Silicon Mac this needs macOS 15 or newer. On anything older, use Docker, below.)
 
-All options use the same tools and the same rules. Without a key, everything else works and `/api/ask` returns a clear 503. `/api/health` reports which model answers.
-**Protect a public deployment**: set `ECO_TOKEN`; the app sends it as a bearer token (build it in with `--dart-define=ECO_TOKEN=...`). Ask is rate limited (`ECO_ASK_PER_MIN`, `ECO_ASK_PER_DAY`).
+### 3. Turn on the AI agent (optional)
 
-**Flutter app** (see `app/README.md` for more):
+Everything works without this except the **Ask** tab. To switch it on:
+
+1. Get a free Gemini key at https://aistudio.google.com/apikey.
+2. Copy the example settings file: `cp .env.example .env`
+3. Open `.env` and fill in these two lines:
+   ```
+   ECO_LLM_PROVIDER=gemini
+   ECO_LLM_API_KEY=your-key-here
+   ```
+4. Restart the backend. `http://localhost:8000/api/health` now shows `"agent": true` and the model name.
+
+`.env` is git-ignored, so your key is never published. Prefer Claude or Groq? Use `ANTHROPIC_API_KEY=...`, or `ECO_LLM_PROVIDER=groq`. The comments in `.env.example` list every option.
+
+### 4. Run the phone app (optional)
+
+Keep the backend running, then in a second terminal:
+
 ```bash
-cd app && flutter pub get
-flutter run -d chrome        # web, open a wide window for the console
-flutter run                  # iOS simulator or Android emulator
-flutter build apk --release --dart-define=ECO_API=https://your-server
+cd app
+flutter pub get
+flutter run -d chrome      # web
+flutter run                # iOS simulator or Android emulator
 ```
-**One link for everything.** Build the web app into the folder the API serves and a single URL carries both:
+
+The app finds the backend on its own (`127.0.0.1:8000`, or `10.0.2.2:8000` on the Android emulator). To rebuild the web app that the backend serves:
+
 ```bash
 cd app && flutter build web --release
-rm -rf ../web_app && cp -r build/web ../web_app          # eco/server.py serves web_app/ next to /api
+rm -rf ../web_app && cp -r build/web ../web_app
 ```
-The API serves the web app from `web_app/` (or `ECO_WEB_DIR`) when it contains an `index.html`; API routes win over files. The `Dockerfile` copies `web_app/` into the image, so deploying to any container host (Render, Railway, Fly.io, Cloud Run) gives a public link.
 
-**Use it from an MCP client** (for example Claude Desktop): `python -m eco.mcp_server` speaks MCP over stdio.
-See `API_CONTRACT.md` for every endpoint and response shape.
+### 5. Check that it works
+
+```bash
+python -m pytest -q          # 34 tests
+python -m eco.evaluate       # should find 7 of 7 planted frauds, 0 false alarms
+```
+
+### Docker instead
+
+```bash
+docker compose up --build    # app and API on :8000, FalkorDB server on :6379
+```
+
+### Put it online
+
+Push the repo to GitHub, then on https://render.com choose **New > Blueprint**, pick this repo and paste your Gemini key when asked. Render reads `render.yaml` and builds the `Dockerfile`. Details are in [DEPLOY.md](DEPLOY.md).
+
+### Use it from Claude Desktop or another MCP client
+
+`python -m eco.mcp_server` speaks MCP over stdio. Every endpoint is described in [API_CONTRACT.md](API_CONTRACT.md).
+
+## Try it: a one-minute walk-through
+
+1. **Home** shows 5 cases that need a decision and 27,880 tonnes at risk.
+2. **Ask** tab: tap *Triage every open case*. The agent calls the graph tools and ranks the cases.
+3. **Cases**: open `CASE-3774F`, the top case. The graph shows the problem path.
+4. **Trace**: search `CR-00694` to follow one credit from its retirement back to the land.
+5. Open the case and choose **Freeze**, then confirm.
+6. **History** shows your decision and whether you agreed with the agent. *Settings > Reset demo data* starts over.
 
 ## Graph data model
 

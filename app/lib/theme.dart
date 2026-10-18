@@ -3,7 +3,6 @@ import 'dart:math' show cos, sin, pi;
 
 import 'package:flutter/material.dart';
 
-/// The EcoGraph "ledger" look: light paper, dark ink, vermilion for danger, amber for review, verdigris for done.
 class Tone {
   static const ground = Color(0xFFF3F1EC);
   static const paper = Color(0xFFFFFFFF);
@@ -30,7 +29,6 @@ class Tone {
   static const navyMuted = Color(0xFF8B95A8);
   static const navyCard = Color(0xFF141B29);
 
-  /// Corner radii used everywhere: soft, never sharp.
   static const rCard = 24.0;
   static const rInner = 18.0;
 }
@@ -38,11 +36,9 @@ class Tone {
 const _sansFamily = 'SchibstedGrotesk';
 const _monoFamily = 'JetBrainsMono';
 
-/// Body text (Schibsted Grotesk). `height` is a multiple of the font size.
 TextStyle sans(double size, {FontWeight weight = FontWeight.w400, Color color = Tone.ink, double? height, double? spacing}) =>
     TextStyle(fontFamily: _sansFamily, fontSize: size, fontWeight: weight, color: color, height: height, letterSpacing: spacing);
 
-/// Data text: ids, scores, code (JetBrains Mono).
 TextStyle mono(double size, {FontWeight weight = FontWeight.w400, Color color = Tone.ink, double? height, double? spacing}) =>
     TextStyle(fontFamily: _monoFamily, fontSize: size, fontWeight: weight, color: color, height: height, letterSpacing: spacing);
 
@@ -86,7 +82,7 @@ String fmtInt(num n) {
 }
 
 Color bandColor(String band) => band == 'freeze' ? Tone.vermilion : band == 'review' ? Tone.amber : Tone.ink3;
-/// Fill colour for the 20-tick score meter (the review amber is a touch lighter than its text colour).
+
 Color bandFill(String band) => band == 'freeze' ? Tone.vermilion : band == 'review' ? const Color(0xFFC97A10) : Tone.ink3;
 Color bandTint(String band) => band == 'freeze' ? Tone.vermilionTint : band == 'review' ? Tone.amberTint : Tone.line2;
 String bandLabel(String band) => band == 'freeze' ? 'FREEZE SUGGESTED' : band == 'review' ? 'NEEDS REVIEW' : 'WATCH';
@@ -108,7 +104,6 @@ String findingLabel(String t) => switch (t) {
       _ => t.toUpperCase().replaceAll('_', ' '),
     };
 
-// ---- graph node kinds -----------------------------------------------------------------------------
 Color kindColor(String k) => switch (k) {
       'project' => const Color(0xFF0C111B),
       'parcel' => const Color(0xFFE2B866),
@@ -121,8 +116,6 @@ String kindLetter(String k) => switch (k) { 'project' => 'P', 'parcel' => 'L', '
 String kindName(String k) => switch (k) { 'project' => 'Project', 'parcel' => 'Land', 'registry' => 'Registry', 'credit' => 'Credit', _ => 'Buyer' };
 bool kindSquare(String k) => k == 'project' || k == 'registry';
 
-// ---- small shared widgets -------------------------------------------------------------------------
-/// Three lines through one point: the freeze mark.
 class SnowIcon extends StatelessWidget {
   final double size;
   final Color color;
@@ -154,7 +147,6 @@ class _SnowPainter extends CustomPainter {
   bool shouldRepaint(_SnowPainter old) => old.color != color;
 }
 
-/// The three-node mark next to the name.
 class Glyph extends StatelessWidget {
   final double size;
   final Color color;
@@ -200,7 +192,6 @@ class Wordmark extends StatelessWidget {
       ]);
 }
 
-/// A soft, fully rounded label.
 class Stamp extends StatelessWidget {
   final String text;
   final Color color;
@@ -241,7 +232,6 @@ class SyntheticTag extends StatelessWidget {
       );
 }
 
-/// Score as a smooth rounded bar that fills with a springy ease, with small marks at the refer (0.50) and freeze (0.85) lines.
 class TickMeter extends StatelessWidget {
   final double value;
   final Color color;
@@ -294,7 +284,6 @@ class _BarPainter extends CustomPainter {
   bool shouldRepaint(_BarPainter old) => old.v != v || old.color != color || old.h != h;
 }
 
-/// The small shape-and-letter badge for a node kind.
 class KindDot extends StatelessWidget {
   final String kind;
   final double size;
@@ -309,7 +298,6 @@ class KindDot extends StatelessWidget {
       );
 }
 
-/// Press feedback with a little spring: the child shrinks while held and bounces back.
 class Bounce extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
@@ -337,7 +325,6 @@ class _BounceState extends State<Bounce> {
       );
 }
 
-/// Fades and floats its child up when it first appears. `index` staggers a list.
 class Reveal extends StatelessWidget {
   final Widget child;
   final int index;
@@ -352,7 +339,6 @@ class Reveal extends StatelessWidget {
       );
 }
 
-/// Soft slide-and-fade between screens.
 class EcoRoute<T> extends PageRouteBuilder<T> {
   EcoRoute(Widget page)
       : super(
@@ -369,7 +355,6 @@ class EcoRoute<T> extends PageRouteBuilder<T> {
         );
 }
 
-/// Round icon button, 44 px (a comfortable touch target).
 class SquareButton extends StatelessWidget {
   final IconData icon;
   final String tooltip;
@@ -390,7 +375,6 @@ class SquareButton extends StatelessWidget {
       );
 }
 
-/// Full-width action button: filled or outlined, 56 px tall, fully rounded.
 class ActionButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -423,7 +407,6 @@ class ActionButton extends StatelessWidget {
   }
 }
 
-/// A gently pulsing dot: the agent is thinking, or a server is live.
 class PulseDot extends StatefulWidget {
   final Color color;
   final double size;
@@ -457,7 +440,6 @@ class _PulseDotState extends State<PulseDot> with SingleTickerProviderStateMixin
       );
 }
 
-/// The "agent" chip: ultramarine, with the little network glyph.
 class AgentChip extends StatelessWidget {
   final String text;
   const AgentChip(this.text, {Key? key}) : super(key: key);
@@ -497,7 +479,6 @@ class _AgentGlyph extends CustomPainter {
   bool shouldRepaint(_AgentGlyph old) => old.color != color;
 }
 
-/// Shown when the server cannot be reached or a call fails.
 class ErrorBox extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
@@ -517,7 +498,6 @@ class ErrorBox extends StatelessWidget {
       );
 }
 
-/// 4 JUL 2026 · 15:14 UTC from the server's "2026-07-04 15:14 UTC".
 String fmtWhen(String s) {
   final m = RegExp(r'^(\d{4})-(\d{2})-(\d{2}) (\d{2}:\d{2}) UTC$').firstMatch(s);
   if (m == null) return s.toUpperCase();
@@ -529,8 +509,6 @@ String fmtWhen(String s) {
 
 String actionWord(String action) => switch (action) { 'freeze' => 'FROZEN', 'refer' => 'REFERRED', 'dismiss' => 'DISMISSED', _ => action.toUpperCase() };
 
-
-/// Pill-shaped segmented tabs: the selected one is a rounded ink pill that glides.
 class EcoTabBar extends StatelessWidget {
   final TabController controller;
   final List<String> labels;

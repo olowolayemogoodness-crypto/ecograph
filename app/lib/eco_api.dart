@@ -7,15 +7,14 @@ const _apiEnv = String.fromEnvironment('ECO_API');
 
 String _defaultBase() {
   if (kIsWeb) {
-    // Served by the API itself (the deployed demo): same origin. Local `flutter run -d chrome`: the API on this machine.
+
     final host = Uri.base.host;
     return (host.isEmpty || host == 'localhost' || host == '127.0.0.1') ? 'http://127.0.0.1:8000' : Uri.base.origin;
   }
-  // The Android emulator reaches the host machine at 10.0.2.2; the iOS simulator shares the Mac's localhost.
+
   return defaultTargetPlatform == TargetPlatform.android ? 'http://10.0.2.2:8000' : 'http://127.0.0.1:8000';
 }
 
-/// Where the API lives. Override with `--dart-define=ECO_API=https://your-server`.
 String get apiBase => _apiEnv.isNotEmpty ? _apiEnv : _defaultBase();
 const apiToken = String.fromEnvironment('ECO_TOKEN', defaultValue: '');
 
@@ -71,7 +70,6 @@ class TraceStep {
         detail = j['detail'] ?? '';
 }
 
-/// What the agent recommended on a case. It is a note for the reviewer: only a person can act on it.
 class Proposal {
   final String action, rationale, at;
   Proposal(Map<String, dynamic> j)
@@ -124,7 +122,6 @@ class CaseDetail extends CaseSummary {
         super(j);
 }
 
-/// What the server returns after a person decides.
 class DecisionResult {
   final CaseDetail detail;
   final String log, at, status, proposed;
@@ -196,11 +193,9 @@ class EcoApi {
 
   Future<CaseDetail> caseDetail(String id) async => CaseDetail(await _go(_c.get(_u('/api/cases/$id'), headers: _h)));
 
-  /// action: freeze | refer | dismiss. Returns the refreshed case and the audit log entry.
   Future<DecisionResult> decide(String id, String action, {String note = ''}) async =>
       DecisionResult(await _go(_c.post(_u('/api/cases/$id/decision'), headers: _h, body: jsonEncode({'action': action, 'note': note}))));
 
-  /// Rebuilds the synthetic ledger and clears every decision (the demo reset).
   Future<void> reset() async {
     await _go(_c.post(_u('/api/reset'), headers: _h, body: '{}'));
   }

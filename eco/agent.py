@@ -1,13 +1,3 @@
-"""Tool-use loop. The model reaches the graph only through MCP tools.
-
-The agent talks to the EcoGraph MCP server over an in-process MCP connection (same protocol as a remote client),
-lists the tools, lets the model choose, and records every call for the console trace.
-
-Two model back ends, same tools, same rules:
-  * Claude (default): set ANTHROPIC_API_KEY. The model is ECO_MODEL.
-  * Any OpenAI-compatible chat API: set ECO_LLM_API_KEY plus ECO_LLM_PROVIDER=gemini|groq|openrouter,
-    or ECO_LLM_BASE_URL and ECO_LLM_MODEL for another one. Gemini and Groq both have free tiers.
-"""
 import asyncio
 import json
 import os
@@ -20,7 +10,7 @@ from eco.mcp_server import build_server
 
 MODEL = os.environ.get("ECO_MODEL", "claude-sonnet-5-5")
 
-# provider -> (base URL, default model). ECO_LLM_BASE_URL and ECO_LLM_MODEL override either.
+
 PRESETS = {
     "gemini": ("https://generativelanguage.googleapis.com/v1beta/openai", "gemini-3.8-flash"),
     "groq": ("https://api.groq.com/openai/v1", "llama-3.3-70b-versatile"),
@@ -44,16 +34,12 @@ class AgentUnavailable(Exception):
     pass
 
 
-# ---- which model back end is switched on ------------------------------------------------------------
 def _key(name):
-    """An API key from the environment. Empty when it is unset or still a placeholder copied from instructions
-    ('sk-ant-...', 'your-key'), so a leftover `export ANTHROPIC_API_KEY=sk-ant-...` cannot shadow the real key."""
     v = os.environ.get(name, "").strip()
     return "" if (not v or "..." in v or "\u2026" in v or v.lower().startswith(("your", "paste", "<"))) else v
 
 
 def provider():
-    """'anthropic', the name of an OpenAI-compatible provider, or None when no key is set."""
     if _key("ANTHROPIC_API_KEY"):
         return "anthropic"
     if _key("ECO_LLM_API_KEY"):
@@ -66,7 +52,6 @@ def available():
 
 
 def llm_settings():
-    """(base URL, model) for the OpenAI-compatible back end: the preset, then any override."""
     base, model = PRESETS.get(os.environ.get("ECO_LLM_PROVIDER", "").strip().lower(), ("", ""))
     base = (os.environ.get("ECO_LLM_BASE_URL") or base).rstrip("/")
     model = os.environ.get("ECO_LLM_MODEL") or model
@@ -76,7 +61,6 @@ def llm_settings():
 
 
 def model_name():
-    """The model that answers questions, for the health check and the AI-use note in the app."""
     p = provider()
     if p == "anthropic":
         return MODEL
@@ -88,7 +72,6 @@ def model_name():
     return None
 
 
-# what to tell a person when the provider refuses a call (the raw reply follows, for anything not listed)
 HTTP_HINTS = {
     401: "It rejected the key: check ECO_LLM_API_KEY.",
     403: "It rejected the key: check ECO_LLM_API_KEY.",
@@ -98,7 +81,6 @@ HTTP_HINTS = {
 
 
 class ChatClient:
-    """Minimal async client for an OpenAI-compatible /chat/completions endpoint (standard library only)."""
 
     def __init__(self, base_url, api_key, timeout=60):
         self.base_url, self.api_key, self.timeout = base_url.rstrip("/"), api_key, timeout
@@ -110,7 +92,7 @@ class ChatClient:
         req = urllib.request.Request(
             self.base_url + "/chat/completions", data=json.dumps(payload).encode(), method="POST",
             headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.api_key}",
-                     "User-Agent": "ecograph-agent/1.0"})        # some providers block the default urllib agent
+                     "User-Agent": "ecograph-agent/1.0"})
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as r:
                 return json.loads(r.read())
@@ -130,13 +112,11 @@ def make_client():
     raise AgentUnavailable("Set ANTHROPIC_API_KEY (Claude) or ECO_LLM_API_KEY (Gemini, Groq or another OpenAI-compatible provider) to enable the agent.")
 
 
-# ---- tools ------------------------------------------------------------------------------------------
 def _schema_of(t):
     return getattr(t, "input_schema", None) or getattr(t, "inputSchema", None) or {"type": "object", "properties": {}}
 
 
 def _tool_defs(tools):
-    """Anthropic tool format."""
     return [{"name": t.name, "description": t.description or "", "input_schema": _schema_of(t)} for t in tools]
 
 
@@ -144,7 +124,6 @@ _DROP = {"title", "default", "additionalProperties", "$schema", "$defs"}
 
 
 def _clean(s):
-    """Strip JSON-schema keywords that some providers reject. Parameter names under `properties` are kept."""
     if isinstance(s, dict):
         return {k: ({n: _clean(p) for n, p in v.items()} if k == "properties" and isinstance(v, dict) else _clean(v))
                 for k, v in s.items() if k not in _DROP}
@@ -154,7 +133,6 @@ def _clean(s):
 
 
 def _openai_tools(tools):
-    """OpenAI function-calling format. A tool with no parameters omits `parameters` (the safest form across providers)."""
     out = []
     for t in tools:
         fn = {"name": t.name, "description": t.description or ""}
@@ -177,7 +155,6 @@ def _result_payload(res):
 
 
 async def _run_tool(mc, name, args, calls):
-    """Call one MCP tool, record the Cypher behind it for the console, and return the text handed back to the model."""
     try:
         payload = _result_payload(await mc.call_tool(name, args))
     except Exception as e:
@@ -190,7 +167,6 @@ async def _run_tool(mc, name, args, calls):
     return json.dumps(payload, default=str)[:12000]
 
 
-# ---- the two loops ----------------------------------------------------------------------------------
 async def _loop_anthropic(mc, client, tools, question, model, max_steps):
     defs, calls = _tool_defs(tools), []
     messages = [{"role": "user", "content": question}]
@@ -212,8 +188,6 @@ async def _loop_anthropic(mc, client, tools, question, model, max_steps):
 
 
 def token_budget():
-    """Output-token cap for each model call. Gemini counts its hidden reasoning against the cap, so it gets more room.
-    ECO_LLM_MAX_TOKENS overrides it."""
     try:
         return int(os.environ["ECO_LLM_MAX_TOKENS"])
     except (KeyError, ValueError):
@@ -231,16 +205,16 @@ async def _loop_chat(mc, client, tools, question, model, max_steps):
         tool_calls = msg.get("tool_calls") or []
         text = (msg.get("content") or "").strip()
         if not tool_calls and not text and choice.get("finish_reason") == "length" and not widened:
-            budget, widened = min(budget * 4, 16000), True     # a reasoning model spent the whole cap thinking: ask again with room
+            budget, widened = min(budget * 4, 16000), True
             continue
         if not tool_calls:
             return {"answer": text or ("The model ran out of room before it answered. Set ECO_LLM_MAX_TOKENS higher."
                                        if choice.get("finish_reason") == "length" else "The model returned no answer. Try again."),
                     "calls": calls, "tools_available": [t.name for t in tools]}
         for i, tc in enumerate(tool_calls):
-            if not tc.get("id"):                       # some providers return blank ids; the reply must quote one
+            if not tc.get("id"):
                 tc["id"] = f"call_{step}_{i}"
-        # tool_calls go back exactly as received: Gemini 3 hides its reasoning signature inside them
+
         messages.append({"role": "assistant", "content": msg.get("content") or "", "tool_calls": tool_calls})
         for tc in tool_calls:
             fn = tc.get("function") or {}
@@ -255,7 +229,6 @@ async def _loop_chat(mc, client, tools, question, model, max_steps):
 
 
 async def ask(g, question, cases_fn=None, client=None, model=None, max_steps=10):
-    """Answer one question. `client` is an Anthropic-style client, or a ChatClient-style one that has `.chat`."""
     client = client or make_client()
     chat_style = hasattr(client, "chat")
     model = model or (llm_settings()[1] if chat_style else MODEL)

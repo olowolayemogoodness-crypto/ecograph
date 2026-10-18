@@ -4,14 +4,11 @@ import 'package:flutter/material.dart';
 import 'eco_api.dart';
 import 'theme.dart';
 
-/// The evidence sub-graph of one case: pinch to zoom, red ring = part of the problem, dashed red = suspicious link.
-/// The parent decides the size (put it in an AspectRatio).
 class EvidenceGraph extends StatelessWidget {
   final List<EvNode> nodes;
   final List<EvEdge> edges;
   final double nodeRadius;
 
-  /// Pinch to zoom. Turn off on desktop, where the mouse wheel should scroll the page instead.
   final bool zoomable;
   const EvidenceGraph({Key? key, required this.nodes, required this.edges, this.nodeRadius = 16, this.zoomable = true}) : super(key: key);
 
@@ -45,7 +42,7 @@ class EvidencePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // dot grid
+
     final dot = Paint()..color = Tone.dots;
     for (double x = 8; x < size.width; x += 16) {
       for (double y = 8; y < size.height; y += 16) {
@@ -56,7 +53,6 @@ class EvidencePainter extends CustomPainter {
     Offset pos(EvNode n) => Offset(padX + n.x * (size.width - 2 * padX), padTop + n.y * (size.height - padTop - padBottom));
     final byId = {for (final n in nodes) n.id: n};
 
-    // links first, so nodes sit on top
     final labels = <MapEntry<String, Offset>>[];
     for (final e in edges) {
       final a = byId[e.a], b = byId[e.b];
@@ -94,7 +90,6 @@ class EvidencePainter extends CustomPainter {
       _text(canvas, l.key, l.value, _ts(10.5, FontWeight.w400, Tone.ink2), background: Tone.plot);
     }
 
-    // nodes
     final pop = Curves.easeOutBack.transform(t.clamp(0.0, 1.0));
     for (final n in nodes) {
       final p = pos(n);
@@ -156,7 +151,6 @@ class EvidencePainter extends CustomPainter {
   bool shouldRepaint(EvidencePainter old) => old.nodes != nodes || old.edges != edges || old.r != r || old.t != t;
 }
 
-/// Key to the shapes, rings and dashed links.
 class GraphLegend extends StatelessWidget {
   final List<String> kinds;
   const GraphLegend({Key? key, required this.kinds}) : super(key: key);

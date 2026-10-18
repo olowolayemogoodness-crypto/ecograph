@@ -13,7 +13,7 @@ def test_every_planted_fraud_found_and_no_decoy_flagged(g):
     r = evaluate.evaluate(g)
     assert r["missed"] == [] and r["false_positives"] == []
     assert r["precision"] == 1.0 and r["recall"] == 1.0
-    assert r["planted"] == 7          # 2 overlaps, 1 registry duplicate, 2 double retirements, 2 loops
+    assert r["planted"] == 7
 
 
 def test_loops_need_the_same_credit_and_three_holders(g):
@@ -21,8 +21,8 @@ def test_loops_need_the_same_credit_and_three_holders(g):
     loops = D.find_trading_loops(g)["loops"]
     keys = {l["key"] for l in loops}
     assert keys == {"BR-02|BR-05|CO-08", "BR-09|BR-11|BR-12|CO-22"}
-    assert not any({"BR-03", "BR-04"} & set(l["holders"]) for l in loops)      # swap decoy
-    assert not any("BR-14" in l["holders"] for l in loops)                    # long honest chain decoy
+    assert not any({"BR-03", "BR-04"} & set(l["holders"]) for l in loops)
+    assert not any("BR-14" in l["holders"] for l in loops)
     assert sum(len(l["credits"]) for l in loops) == 5
 
 
@@ -41,7 +41,7 @@ def test_duplicate_is_not_also_reported_as_overlap(g):
 def test_big_honest_buyer_is_not_a_double_retirement(g):
     retired = g.ro_query("MATCH (c:Credit)-[:RETIRED_BY]->(:Buyer {id:'CO-01'}) RETURN count(c)").result_set[0][0]
     assert retired > 100
-    assert len(D.find_double_retirements(g)["double_retirements"]) == 2        # only the two planted credits
+    assert len(D.find_double_retirements(g)["double_retirements"]) == 2
 
 
 def test_scan_groups_findings_into_five_cases_and_ring_is_one_cluster(g):
@@ -97,7 +97,7 @@ def test_freeze_is_a_logged_human_decision(g):
     assert g.ro_query("MATCH (c:Credit) WHERE c.frozen = true RETURN count(c)").result_set[0][0] == 4
     acts = D.list_actions(g)["actions"]
     assert acts[0]["case"] == case["id"] and acts[0]["action"] == "freeze" and acts[0]["by"] == "human reviewer"
-    again = D.scan(g)                      # the decision survives a re-scan
+    again = D.scan(g)
     assert D.decisions(g)[case["id"]]["status"] == "frozen"
     with pytest.raises(ValueError):
         D.decide(g, case, "delete")

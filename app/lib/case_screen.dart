@@ -5,7 +5,6 @@ import 'eco_api.dart';
 import 'panels.dart';
 import 'theme.dart';
 
-/// One case on a phone: header, four tabs, and the decision bar.
 class CaseScreen extends StatefulWidget {
   final EcoApi api;
   final String id;
@@ -129,7 +128,6 @@ class _CaseScreenState extends State<CaseScreen> with SingleTickerProviderStateM
   }
 }
 
-// ---- Decision recorded -----------------------------------------------------------------------------
 class DecisionRecordedScreen extends StatefulWidget {
   final EcoApi api;
   final DecisionResult result;
@@ -153,7 +151,7 @@ class _DecisionRecordedScreenState extends State<DecisionRecordedScreen> {
       final n = o['open'];
       if (mounted && n is num) setState(() => open = n.toInt());
     } catch (_) {
-      // the count is a nicety; the screen works without it
+
     }
   }
 
@@ -274,7 +272,6 @@ class _DecisionRecordedScreenState extends State<DecisionRecordedScreen> {
   }
 }
 
-// ---- Audit log -------------------------------------------------------------------------------------
 class AuditLogScreen extends StatefulWidget {
   final EcoApi api;
   const AuditLogScreen({Key? key, required this.api}) : super(key: key);

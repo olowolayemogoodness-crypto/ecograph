@@ -1,20 +1,3 @@
-"""JSON API for the EcoGraph Flutter app (stdlib only).
-
-    python -m eco.server [port]          # embedded FalkorDB, or a server if FALKORDB_HOST is set
-
-    GET  /api/health                      no auth
-    GET  /api/overview                    graph size, case counts, tonnes at risk
-    GET  /api/cases                       ranked case queue
-    GET  /api/cases/<id>                  evidence graph, score breakdown, the queries behind it
-    POST /api/cases/<id>/decision         {action: freeze|refer|dismiss, note}   (a person's decision: the only write that touches credits)
-    GET  /api/credits/<id>                upstream trace of one credit
-    GET  /api/actions                     audit log of decisions, plus proposals still waiting
-    POST /api/ask                         {question, case_id?}  the model chooses MCP tools (ANTHROPIC_API_KEY, or ECO_LLM_API_KEY);
-                                          it may record a Proposal on a case (a note: it freezes nothing)
-    POST /api/reset                       rebuild the synthetic ledger
-
-Set ECO_TOKEN to require `Authorization: Bearer <token>` on everything except /api/health.
-"""
 import asyncio
 import hmac
 import json
@@ -30,12 +13,12 @@ from urllib.parse import urlparse
 from eco.envfile import load_env
 
 if __name__ == "__main__":
-    load_env()          # `python -m eco.server` reads ./.env before the settings below are read; importing the module (tests) does not
+    load_env()
 
 from eco import agent, detect as D, graph
 
 TOKEN = os.environ.get("ECO_TOKEN", "")
-# A built Flutter web app (`flutter build web`) placed here is served from the same URL as the API: one link for the demo.
+
 WEB_DIR = Path(os.environ.get("ECO_WEB_DIR") or Path(__file__).resolve().parent.parent / "web_app")
 mimetypes.add_type("application/wasm", ".wasm")
 mimetypes.add_type("text/javascript", ".mjs")
@@ -46,12 +29,11 @@ TYPE_TOOL = {"overlap": "find_overlapping_claims", "registry_duplicate": "find_r
 
 
 class Engine:
-    """Holds the graph and the cached scan. The embedded FalkorDB is single-process, so one lock serialises requests."""
     def __init__(self, g=None):
         self.lock = threading.RLock()
         self.g = g or graph.open_graph(fresh=True)
         self.scan_result = None
-        self.hits = {}                      # ip -> recent ask timestamps
+        self.hits = {}
         self.day = {"stamp": time.strftime("%Y-%m-%d"), "n": 0}
         self.refresh()
 
@@ -115,20 +97,19 @@ def make_handler(eng):
             self.wfile.write(body)
 
         def _static(self, path):
-            """Serve the built web app if one is present. Returns False when there is nothing to serve for this path."""
             root = Path(WEB_DIR).resolve()
             if not (root / "index.html").is_file():
                 return False
             rel = path.lstrip("/") or "index.html"
             f = (root / rel).resolve()
-            if f != root and root not in f.parents:          # no ../ tricks
+            if f != root and root not in f.parents:
                 return False
             if f.is_dir():
                 f = f / "index.html"
             if not f.is_file():
-                if "." in rel.rsplit("/", 1)[-1]:            # a missing asset is a real 404
+                if "." in rel.rsplit("/", 1)[-1]:
                     return False
-                f = root / "index.html"                      # app routes fall back to the single page
+                f = root / "index.html"
             data = f.read_bytes()
             self.send_response(200)
             self.send_header("Content-Type", mimetypes.guess_type(str(f))[0] or "application/octet-stream")
@@ -224,7 +205,7 @@ def make_handler(eng):
                     except agent.AgentUnavailable as e:
                         return self._send({"error": str(e), "unavailable": True}, 503)
                     except BaseException as e:
-                        while getattr(e, "exceptions", None):      # unwrap ExceptionGroup to the real cause
+                        while getattr(e, "exceptions", None):
                             e = e.exceptions[0]
                         import traceback
                         traceback.print_exception(e)

@@ -8,7 +8,6 @@ import 'eco_api.dart';
 import 'shell.dart';
 import 'theme.dart';
 
-/// Soft blobs that drift and melt into each other (blur, then a hard alpha threshold = the "goo" effect).
 class GooField extends StatefulWidget {
   final List<Color> colors;
   final Color background;
@@ -65,7 +64,6 @@ class _GooPainter extends CustomPainter {
   bool shouldRepaint(_GooPainter old) => old.t != t;
 }
 
-/// 1. Splash: blobs melt together, the mark pops in, then on to the welcome page.
 class SplashScreen extends StatefulWidget {
   final EcoApi api;
   const SplashScreen({Key? key, required this.api}) : super(key: key);
@@ -116,7 +114,6 @@ class _SplashScreenState extends State<SplashScreen> {
       );
 }
 
-/// 2. Welcome: what it does, one button in. Sign-in will sit here later.
 class WelcomeScreen extends StatelessWidget {
   final EcoApi api;
   const WelcomeScreen({Key? key, required this.api}) : super(key: key);

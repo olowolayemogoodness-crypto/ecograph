@@ -29,7 +29,7 @@ def test_mcp_tools_are_listed_and_only_one_can_write(g):
             res = await c.call_tool("find_double_retirements", {})
             return names, res
     names, res = asyncio.run(go())
-    assert names == READ_ONLY_TOOLS | {"propose_action"}                      # ten readers and one note-writer
+    assert names == READ_ONLY_TOOLS | {"propose_action"}
     assert not any(w in n for n in names for w in ("freeze", "decide", "write", "delete"))
     assert len(json.loads("".join(c.text for c in res.content))["double_retirements"]) == 2
 
@@ -60,9 +60,9 @@ def test_propose_action_writes_a_note_and_never_touches_a_credit():
     assert again["proposal"]["action"] == "refer"
     assert all("error" in e for e in errors)
     pend = D.proposals(eng.g)
-    assert set(pend) == {top["id"]} and pend[top["id"]]["action"] == "refer"        # the newer one replaced the older
+    assert set(pend) == {top["id"]} and pend[top["id"]]["action"] == "refer"
     assert next(c for c in listed["cases"] if c["id"] == top["id"])["pending_proposal"] == "refer"
-    # it is only a note: no credit frozen, no case closed, the proposal hangs off the case's projects
+
     assert D._rows(eng.g, "MATCH (c:Credit) WHERE c.frozen IS NOT NULL RETURN count(c)")[0][0] == 0
     assert D._rows(eng.g, "MATCH (k:Case) RETURN count(k)")[0][0] == 0
     about = {r[0] for r in D._rows(eng.g, "MATCH (:Proposal {status: 'pending'})-[:ABOUT]->(j:Project) RETURN j.id")}
@@ -75,8 +75,8 @@ def test_a_persons_decision_settles_the_proposal_and_is_logged():
     top, second = eng.cases()[0], eng.cases()[1]
     D.propose(eng.g, top, "freeze", "Double retirement plus an overlap at the same project.")
     D.propose(eng.g, second, "freeze", "Registry duplicate, though no audit on file.")
-    agreed = D.decide(eng.g, top, "freeze")                      # the person agrees
-    overrode = D.decide(eng.g, second, "refer")                  # the person decides differently
+    agreed = D.decide(eng.g, top, "freeze")
+    overrode = D.decide(eng.g, second, "refer")
     assert agreed["proposed"] == "freeze" and overrode["proposed"] == "freeze"
     status = dict(D._rows(eng.g, "MATCH (p:Proposal) RETURN p.case, p.status"))
     assert status == {top["id"]: "accepted", second["id"]: "overridden"}
@@ -88,7 +88,7 @@ def test_a_persons_decision_settles_the_proposal_and_is_logged():
         async with Client(build_server(eng.g, lambda: eng.scan_result)) as c:
             return _payload(await c.call_tool("propose_action", {"case_id": top["id"], "action": "dismiss",
                                                                  "rationale": "Trying to reopen a decided case here."}))
-    assert "already frozen" in asyncio.run(go())["error"]       # a decided case takes no new proposal
+    assert "already frozen" in asyncio.run(go())["error"]
     assert all(c["proposal"] is None for c in eng.cases() if c["status"] != "open")
 
 
@@ -100,7 +100,6 @@ def test_cluster_suspicious_uses_wcc(g):
 
 
 class FakeModel:
-    """Scripted stand-in for the Anthropic client: lists cases, then traces one credit, then answers."""
     def __init__(self):
         self.calls = 0
         self.messages = NS(create=self.create)
@@ -152,7 +151,7 @@ def test_api_case_queue_detail_and_decision(api):
     assert any("MATCH" in t["cypher"] for t in d["trace"])
     code, r = api(f"/api/cases/{cid}/decision", {"action": "freeze", "note": "ok"})
     assert code == 200 and r["credits_frozen"] == 4
-    assert api(f"/api/cases/{cid}/decision", {"action": "dismiss"})[0] == 409          # already decided
+    assert api(f"/api/cases/{cid}/decision", {"action": "dismiss"})[0] == 409
     assert api("/api/cases/CASE-NOPE")[0] == 404
     assert api(f"/api/cases/{q['cases'][1]['id']}/decision", {"action": "launch"})[0] == 400
     assert api("/api/overview")[1]["open"] == 4
@@ -169,7 +168,6 @@ def test_api_ask_needs_key_and_token_is_enforced(api, monkeypatch):
 
 
 class FakeProposer:
-    """Scripted Anthropic-style model: list the cases, record one proposal on the first, then answer."""
     def __init__(self, case_id):
         self.case_id, self.calls = case_id, 0
         self.messages = NS(create=self.create)
@@ -226,18 +224,16 @@ def test_built_web_app_is_served_next_to_the_api(tmp_path, monkeypatch):
     try:
         assert get("/") == (200, "text/html", b"<html>EcoGraph web</html>")
         assert get("/main.dart.js")[0:2] == (200, "text/javascript")
-        assert get("/some/app/route")[0] == 200                      # single page fallback
-        assert get("/missing.js")[0] == 404                          # a missing asset is a 404
+        assert get("/some/app/route")[0] == 200
+        assert get("/missing.js")[0] == 404
         status, _, body = get("/../../../../etc/passwd")
-        assert status != 200 or b"root:" not in body                 # no path traversal
-        assert get("/api/health")[0] == 200                          # the API still wins on /api
+        assert status != 200 or b"root:" not in body
+        assert get("/api/health")[0] == 200
     finally:
         srv.shutdown()
 
 
-# ---- OpenAI-compatible back end (Gemini, Groq, OpenRouter, OpenAI) --------------------------------------
 class FakeProvider:
-    """A scripted OpenAI-style /chat/completions server: calls two tools (one with a blank id), then answers."""
     def __init__(self):
         self.requests = []
         outer = self
@@ -294,23 +290,22 @@ def test_openai_compatible_agent_loop_uses_the_same_mcp_tools(g, provider_env):
     assert first["model"] == "test-model" and first["messages"][0]["role"] == "system"
     names = {t["function"]["name"] for t in first["tools"]}
     assert {"list_cases", "trace_credit_upstream", "run_cypher"} <= names
-    # tools without parameters send none; schema keywords some providers reject are gone
+
     by_name = {t["function"]["name"]: t["function"] for t in first["tools"]}
     assert "parameters" not in by_name["list_cases"]
     assert by_name["trace_credit_upstream"]["parameters"]["required"] == ["credit_id"]
     assert "title" not in json.dumps(by_name["trace_credit_upstream"]["parameters"])
     assert "default" not in json.dumps(by_name["rank_intermediaries"].get("parameters", {}))
-    # the tool result goes back as a `tool` message quoting the call id, with no `name` field (Groq rejects it)
+
     tool_msg = second["messages"][-1]
     assert tool_msg["role"] == "tool" and tool_msg["tool_call_id"] == "c1" and "name" not in tool_msg and "CASE-" in tool_msg["content"]
-    # a blank id from the provider is replaced, and the reasoning signature inside tool_calls is passed back untouched
+
     echoed = third["messages"][-2]["tool_calls"][0]
     assert echoed["id"] and third["messages"][-1]["tool_call_id"] == echoed["id"]
     assert echoed["extra_content"]["google"]["thought_signature"] == "sig"
 
 
 class ScriptedProvider:
-    """Answers each /chat/completions call with the next canned reply and records what it was sent."""
     def __init__(self, replies):
         self.replies, self.bodies = list(replies), []
         outer = self
@@ -334,7 +329,7 @@ class ScriptedProvider:
 
 
 def test_an_answer_eaten_by_the_reasoning_cap_is_retried_with_more_room(g, monkeypatch):
-    # A reasoning model can spend the whole output cap thinking and return nothing (finish_reason "length").
+
     fake = ScriptedProvider([{"finish_reason": "length", "message": {"role": "assistant", "content": None}},
                              {"finish_reason": "stop", "message": {"role": "assistant", "content": "Two cases need a freeze."}}])
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
@@ -348,7 +343,7 @@ def test_an_answer_eaten_by_the_reasoning_cap_is_retried_with_more_room(g, monke
         fake.srv.shutdown()
     assert out["answer"] == "Two cases need a freeze."
     assert len(fake.bodies) == 2 and fake.bodies[1]["max_tokens"] > fake.bodies[0]["max_tokens"]
-    assert fake.bodies[1]["messages"] == fake.bodies[0]["messages"]           # same question, only the cap changed
+    assert fake.bodies[1]["messages"] == fake.bodies[0]["messages"]
 
 
 def test_an_empty_answer_that_stays_empty_says_why_instead_of_looping(g, monkeypatch):
@@ -361,20 +356,20 @@ def test_an_empty_answer_that_stays_empty_says_why_instead_of_looping(g, monkeyp
         out = asyncio.run(agent.ask(g, "Anything?"))
     finally:
         fake.srv.shutdown()
-    assert len(fake.bodies) == 2                                               # one retry, not a loop
+    assert len(fake.bodies) == 2
     assert "ECO_LLM_MAX_TOKENS" in out["answer"]
 
 
 def test_token_budget_gives_gemini_more_room_and_can_be_overridden(monkeypatch):
     monkeypatch.delenv("ECO_LLM_MAX_TOKENS", raising=False)
     monkeypatch.setenv("ECO_LLM_PROVIDER", "groq")
-    assert agent.token_budget() == 1500                                        # small: Groq counts the cap against its per-minute limit
+    assert agent.token_budget() == 1500
     monkeypatch.setenv("ECO_LLM_PROVIDER", " Gemini ")
-    assert agent.token_budget() == 8192                                        # Gemini's hidden reasoning uses part of the cap
+    assert agent.token_budget() == 8192
     monkeypatch.setenv("ECO_LLM_MAX_TOKENS", "3000")
     assert agent.token_budget() == 3000
     monkeypatch.setenv("ECO_LLM_MAX_TOKENS", "lots")
-    assert agent.token_budget() == 8192                                        # nonsense falls back to the default
+    assert agent.token_budget() == 8192
 
 
 @pytest.mark.parametrize("code, words", [(401, "ECO_LLM_API_KEY"), (404, "ECO_LLM_MODEL"), (429, "rate limit"), (500, "overloaded")])
@@ -402,15 +397,15 @@ def test_provider_selection_and_presets(monkeypatch):
     base, model = agent.llm_settings()
     assert base.endswith("/v1beta/openai") and model == "gemini-3.8-flash" and agent.model_name() == model
     monkeypatch.setenv("ECO_LLM_PROVIDER", "")
-    monkeypatch.setenv("ECO_LLM_BASE_URL", "")             # blank values (an empty .env line) fall back to the preset
+    monkeypatch.setenv("ECO_LLM_BASE_URL", "")
     with pytest.raises(agent.AgentUnavailable):
-        agent.llm_settings()                               # no provider and no URL/model: say what to set
+        agent.llm_settings()
     monkeypatch.setenv("ANTHROPIC_API_KEY", "a")
     assert agent.provider() == "anthropic" and agent.model_name() == agent.MODEL
 
 
 def test_a_placeholder_key_does_not_shadow_the_real_one(monkeypatch):
-    # `export ANTHROPIC_API_KEY=sk-ant-...` copied from instructions would otherwise win over a real Gemini key
+
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-...")
     monkeypatch.setenv("ECO_LLM_API_KEY", "real-gemini-key")
     monkeypatch.setenv("ECO_LLM_PROVIDER", "gemini")
@@ -439,7 +434,6 @@ def test_env_file_fills_missing_variables_only(tmp_path, monkeypatch):
 
 
 def test_env_example_copied_as_it_is_leaves_the_optional_settings_unset(tmp_path, monkeypatch):
-    """The README says: copy .env.example to .env and add a key. A blank value followed by a comment must stay blank."""
     import os
     from pathlib import Path
     from eco.envfile import load_env

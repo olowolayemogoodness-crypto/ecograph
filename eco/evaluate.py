@@ -1,11 +1,3 @@
-"""Score the detectors against the planted ground truth.
-
-    python -m eco.evaluate
-
-The ledger is synthetic and the frauds are planted by `eco/graph.py`, so this measures one thing: does each
-query find what was planted, and does it stay quiet on the look-alike decoys? It does not predict
-performance on real registries.
-"""
 import json
 import sys
 
