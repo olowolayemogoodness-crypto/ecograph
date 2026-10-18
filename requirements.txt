@@ -1,0 +1,5 @@
+falkordblite>=0.10
+FalkorDB>=1.8
+mcp>=2.3
+anthropic>=1.14
+pytest>=9

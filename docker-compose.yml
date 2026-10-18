@@ -1,0 +1,18 @@
+# docker compose up --build        ->  API on http://localhost:8000, FalkorDB on :6379
+services:
+  falkordb:
+    image: falkordb/falkordb:latest
+    ports: ["6379:6379"]
+  api:
+    build: .
+    ports: ["8000:8000"]
+    depends_on: [falkordb]
+    environment:
+      FALKORDB_HOST: falkordb
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ECO_MODEL: ${ECO_MODEL:-claude-sonnet-5-5}
+      ECO_LLM_PROVIDER: ${ECO_LLM_PROVIDER:-}
+      ECO_LLM_API_KEY: ${ECO_LLM_API_KEY:-}
+      ECO_LLM_MODEL: ${ECO_LLM_MODEL:-}
+      ECO_LLM_BASE_URL: ${ECO_LLM_BASE_URL:-}
+      ECO_TOKEN: ${ECO_TOKEN:-}

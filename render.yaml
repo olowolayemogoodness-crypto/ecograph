@@ -1,0 +1,16 @@
+# Render Blueprint: New > Blueprint > pick this repo. Free plan; the service sleeps after ~15 minutes idle.
+services:
+  - type: web
+    name: ecograph
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: ECO_LLM_PROVIDER
+        value: gemini
+      - key: ECO_LLM_API_KEY
+        sync: false            # paste the key in the Render dashboard; it is never committed
+      - key: ECO_ASK_PER_MIN
+        value: "6"
+      - key: ECO_ASK_PER_DAY
+        value: "200"
