@@ -475,3 +475,67 @@ def overview(g):
     counts = dict(_rows(g, Q_OVERVIEW))
     edges = _rows(g, "MATCH ()-[r]->() RETURN count(r)")[0][0]
     return {"nodes": sum(counts.values()), "edges": edges, "by_label": counts}
+
+
+Q_LAND = """MATCH (l:LandParcel) OPTIONAL MATCH (p:Project)-[:COVERS]->(l)
+RETURN l.id, l.geohash, l.hectares, l.country, collect(p.id) ORDER BY l.id"""
+
+CENTRES = {"Brazil": (-10.8, -52.9), "Kenya": (0.3, 37.9), "Indonesia": (-2.2, 117.5), "Peru": (-9.2, -74.5),
+           "India": (22.5, 79.0), "Ghana": (7.9, -1.0)}
+_B32 = "0123456789bcdefghjkmnpqrstuvwxyz"
+
+
+def _geohash(code):
+    lat, lon, even = [-90.0, 90.0], [-180.0, 180.0], True
+    for ch in code:
+        bits = _B32.find(ch) if ch in _B32 else ord(ch) % 32
+        for i in range(4, -1, -1):
+            rng = lon if even else lat
+            mid = (rng[0] + rng[1]) / 2
+            rng[0 if (bits >> i) & 1 else 1] = mid
+            even = not even
+    return (lat[0] + lat[1]) / 2, (lon[0] + lon[1]) / 2
+
+
+def _place(country, geohash):
+    lat, lon = _geohash(geohash)
+    base = CENTRES.get(country, (0.0, 0.0))
+    return round(base[0] + ((lat + 90) % 6) - 3, 5), round(base[1] + ((lon + 180) % 6) - 3, 5)
+
+
+def land_map(g, cases):
+    rows = _rows(g, Q_LAND)
+    live = [c for c in cases if c["status"] == "open"]
+    case_of = {}
+    for c in live:
+        for pid in c["projects"]:
+            case_of.setdefault(pid, c["id"])
+    parcels, country_of = [], {}
+    for lid, gh, ha, country, projects in rows:
+        lat, lon = _place(country, gh)
+        hit = next((case_of[p] for p in projects if p in case_of), None)
+        state = "ok" if hit is None else ("overlap" if len(projects) > 1 else "case")
+        parcels.append({"id": lid, "lat": lat, "lon": lon, "country": country, "hectares": ha,
+                        "projects": projects, "state": state, "case": hit})
+        for p in projects:
+            country_of.setdefault(p, country)
+    by_id = {p["id"]: p for p in parcels}
+    links = []
+    for c in live:
+        pts = [(p["lat"], p["lon"]) for p in parcels if p["case"] == c["id"]]
+        if len(pts) > 1:
+            links.append({"case": c["id"], "points": [list(x) for x in pts]})
+    stats = {}
+    for p in parcels:
+        s = stats.setdefault(p["country"], {"country": p["country"], "parcels": 0, "hectares": 0, "flagged": 0,
+                                            "tonnes_at_risk": 0, "cases": []})
+        s["parcels"] += 1
+        s["hectares"] += p["hectares"]
+        s["flagged"] += p["state"] != "ok"
+    for c in live:
+        places = [country_of[p] for p in c["projects"] if p in country_of]
+        for ctry in set(places):
+            s = stats[ctry]
+            s["tonnes_at_risk"] += round(c["tonnes_at_risk"] * places.count(ctry) / len(places))
+            s["cases"].append(c["id"])
+    return {"parcels": parcels, "links": links, "countries": sorted(stats.values(), key=lambda s: -s["tonnes_at_risk"])}

@@ -20,6 +20,7 @@ from eco import agent, detect as D, graph
 TOKEN = os.environ.get("ECO_TOKEN", "")
 
 WEB_DIR = Path(os.environ.get("ECO_WEB_DIR") or Path(__file__).resolve().parent.parent / "web_app")
+DASHBOARD = Path(__file__).resolve().parent / "dashboard.html"
 mimetypes.add_type("application/wasm", ".wasm")
 mimetypes.add_type("text/javascript", ".mjs")
 ASK_PER_MIN = int(os.environ.get("ECO_ASK_PER_MIN", "10"))
@@ -96,6 +97,15 @@ def make_handler(eng):
             self.end_headers()
             self.wfile.write(body)
 
+        def _page(self, f):
+            data = Path(f).read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+            self.wfile.write(data)
+
         def _static(self, path):
             root = Path(WEB_DIR).resolve()
             if not (root / "index.html").is_file():
@@ -137,6 +147,8 @@ def make_handler(eng):
 
         def do_GET(self):
             path = urlparse(self.path).path.rstrip("/") or "/"
+            if path == "/dashboard":
+                return self._page(DASHBOARD)
             if not path.startswith("/api/") and self._static(path):
                 return
             if path == "/":
@@ -157,6 +169,8 @@ def make_handler(eng):
                                        "synthetic": True})
                 if path == "/api/cases":
                     return self._send({"cases": [brief(c) for c in eng.cases()]})
+                if path == "/api/map":
+                    return self._send(D.land_map(eng.g, eng.cases()))
                 m = re.fullmatch(r"/api/cases/([A-Z0-9-]+)", path)
                 if m:
                     c = eng.get(m.group(1))

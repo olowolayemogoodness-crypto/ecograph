@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EcoGraph land map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--ink:#0B2E1C;--ink2:#3A5643;--ink3:#5C7766;--ground:#E6F2D3;--paper:#fff;--line:#CFE2B8;--forest:#136437;--leaf:#8CC63F;--navy:#0F4A2A;--navy2:#0A3A21;--navyText:#D3EBC2;--red:#C8321F;--redTint:#FBE9E5;--amber:#B8730F;--amberTint:#FBEFD9}
+*{box-sizing:border-box;margin:0}
+body{font:15px/1.45 "Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--ground);display:flex;min-height:100vh}
+aside{width:230px;background:var(--navy);color:var(--navyText);padding:22px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh;flex:none}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;color:#fff;padding:0 8px 18px}
+.brand svg{width:34px;height:34px}
+aside a{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;color:var(--navyText);text-decoration:none;font-weight:600}
+aside a:hover{background:var(--navy2)}
+aside a.on{background:var(--leaf);color:var(--ink)}
+aside .note{margin-top:auto;font-size:12px;color:#9CC4A0;padding:0 8px}
+main{flex:1;min-width:0;padding:22px 26px 40px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+h1{font-size:30px;letter-spacing:-.6px;font-weight:800}
+.sub{color:var(--ink3);font-size:14px}
+.live{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px}
+.live i{width:9px;height:9px;border-radius:50%;background:var(--forest);animation:p 2s infinite}
+@keyframes p{50%{opacity:.35}}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:18px}
+.card h2{font-size:17px;font-weight:800;margin-bottom:12px}
+#map{height:460px;border-radius:16px;border:1px solid var(--line);background:#EAF3DF}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:16px}
+.stat small{color:var(--ink3);font-weight:600;font-size:13px}
+.stat b{display:block;font-size:34px;letter-spacing:-1px;margin-top:2px;font-variant-numeric:tabular-nums}
+.stat em{font-style:normal;font-size:12.5px;color:var(--ink3)}
+.red{color:var(--red)}.green{color:var(--forest)}
+.cases{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow:auto}
+.case{border:1px solid var(--line);border-radius:16px;padding:12px 14px;cursor:pointer;background:#fff;text-align:left;font:inherit;color:inherit;width:100%}
+.case:hover,.case.on{border-color:var(--forest);background:#F4FAEA}
+.case .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tag{font-size:11.5px;font-weight:800;letter-spacing:.6px;padding:3px 9px;border-radius:999px;text-transform:uppercase}
+.tag.freeze{background:var(--redTint);color:var(--red)}.tag.refer{background:var(--amberTint);color:var(--amber)}.tag.dismiss{background:#E1F2EE;color:#0F766E}
+.score{font:700 20px ui-monospace,Menlo,monospace}
+.case p{font-size:13px;color:var(--ink2);margin-top:6px}
+.case .meta{font-size:12.5px;color:var(--ink3);margin-top:4px}
+.bars{display:flex;flex-direction:column;gap:11px}
+.bar .row{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600}
+.bar .track{height:9px;background:#EDF4E2;border-radius:9px;margin-top:5px;overflow:hidden}
+.bar .fill{height:100%;background:linear-gradient(90deg,var(--leaf),var(--forest));border-radius:9px;width:0;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.bar .fill.hot{background:linear-gradient(90deg,#F29A8A,var(--red))}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--ink3);font-weight:600;font-size:12.5px;padding:8px 10px;background:#F4FAEA}
+td{padding:11px 10px;border-top:1px solid #E7F0DA}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+.pill.bad{background:var(--redTint);color:var(--red)}.pill.good{background:#E1F2EE;color:#0F766E}
+.pulse{width:20px;height:20px;border-radius:50%;background:rgba(200,50,31,.85);border:3px solid #fff;box-shadow:0 0 0 0 rgba(200,50,31,.6);animation:r 1.8s infinite}
+@keyframes r{70%{box-shadow:0 0 0 16px rgba(200,50,31,0)}100%{box-shadow:0 0 0 0 rgba(200,50,31,0)}}
+.leaflet-popup-content{font:13px/1.5 system-ui,sans-serif;margin:12px 14px}
+.leaflet-popup-content b{font-size:14px}
+.below{margin-top:18px}
+footer{margin-top:22px;color:var(--ink3);font-size:12.5px}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){aside{display:none}main{padding:16px}h1{font-size:24px}#map{height:340px}}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#8CC63F"/><path d="M11 29C11 17 19 10 30 10c0 12-7 20-17 20" fill="#0B2E1C"/><path d="M12 30c4-7 9-12 14-15" stroke="#8CC63F" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    EcoGraph
+  </div>
+  <a class="on" href="/dashboard">Land map</a>
+  <a href="/">Phone and web app</a>
+  <a href="/api/health" target="_blank" rel="noopener">API health</a>
+  <a href="https://github.com/olowolayemogoodness-crypto/ecograph" target="_blank" rel="noopener">Source code</a>
+  <div class="note">All data is synthetic. Parcel positions are illustrative.</div>
+</aside>
+<main>
+  <header>
+    <div>
+      <h1>Where the carbon is at risk</h1>
+      <div class="sub">Land parcels, linked claims and open cases from the FalkorDB ledger</div>
+    </div>
+    <span class="live"><i></i><span id="stamp">Loading</span></span>
+  </header>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <div id="map"></div>
+        <div class="legend">
+          <span><i class="dot" style="background:#4FA35E"></i>Clean parcel</span>
+          <span><i class="dot" style="background:var(--amber)"></i>Parcel in an open case</span>
+          <span><i class="dot" style="background:var(--red)"></i>Land claimed by two projects</span>
+          <span><i class="dot" style="background:none;border:2px dashed var(--red);width:18px;height:0;border-radius:0"></i>Same scheme</span>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><small>Tonnes at risk</small><b class="red" id="s-t">0</b><em>across open cases</em></div>
+        <div class="stat"><small>Open cases</small><b id="s-c">0</b><em id="s-c2">&nbsp;</em></div>
+        <div class="stat"><small>Parcels flagged</small><b id="s-p">0</b><em id="s-p2">&nbsp;</em></div>
+        <div class="stat"><small>Hectares flagged</small><b id="s-h">0</b><em>of all mapped land</em></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div class="card">
+        <h2>Open cases</h2>
+        <div class="cases" id="cases"></div>
+      </div>
+      <div class="card">
+        <h2>Tonnes at risk by country</h2>
+        <div class="bars" id="bars"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card below">
+    <h2>Country dashboard</h2>
+    <div style="overflow:auto">
+      <table>
+        <thead><tr><th>Country</th><th class="n">Parcels</th><th class="n">Hectares</th><th class="n">Flagged</th><th class="n">Tonnes at risk</th><th>Status</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+  <footer>A person makes every decision. Open a case in the app to freeze, refer or dismiss it.</footer>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+  var COLORS = { ok: "#4FA35E", case: "#B8730F", overlap: "#C8321F" };
+  var el = function (id) { return document.getElementById(id); };
+  var fmt = function (n) { return Number(n).toLocaleString("en-US"); };
+  var make = function (tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  };
+  var get = function (url) {
+    return fetch(url).then(function (r) { if (!r.ok) throw new Error(url); return r.json(); });
+  };
+
+  function countUp(node, to) {
+    var start = performance.now(), dur = 900;
+    function tick(now) {
+      var k = Math.min(1, (now - start) / dur);
+      node.textContent = fmt(Math.round(to * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  var map = L.map("map", { scrollWheelZoom: false, worldCopyJump: true }).setView([8, 20], 2);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    maxZoom: 12,
+    attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
+  }).addTo(map);
+  map.once("focus", function () { map.scrollWheelZoom.enable(); });
+
+  var byCase = {};
+
+  function popup(p) {
+    var box = make("div");
+    box.appendChild(make("b", "", p.id + " · " + p.country));
+    box.appendChild(make("div", "", fmt(p.hectares) + " ha"));
+    box.appendChild(make("div", "", "Projects: " + (p.projects.join(", ") || "none")));
+    box.appendChild(make("div", "", p.case ? "Open case: " + p.case : "No open case"));
+    return box;
+  }
+
+  function draw(m) {
+    m.links.forEach(function (l) {
+      L.polyline(l.points, { color: "#C8321F", weight: 2, opacity: .65, dashArray: "6 7" }).addTo(map);
+    });
+    m.parcels.forEach(function (p) {
+      var marker;
+      if (p.state === "overlap") {
+        marker = L.marker([p.lat, p.lon], { icon: L.divIcon({ className: "", html: '<div class="pulse"></div>', iconSize: [20, 20] }) });
+      } else {
+        marker = L.circleMarker([p.lat, p.lon], {
+          radius: p.state === "case" ? 8 : 5, color: "#fff", weight: 2,
+          fillColor: COLORS[p.state], fillOpacity: p.state === "ok" ? .75 : .95
+        });
+      }
+      marker.bindPopup(popup(p)).addTo(map);
+      if (p.case) (byCase[p.case] = byCase[p.case] || []).push([p.lat, p.lon]);
+    });
+  }
+
+  function caseList(cases) {
+    var host = el("cases");
+    var open = cases.filter(function (c) { return c.status === "open"; });
+    if (!open.length) { host.appendChild(make("p", "sub", "No open cases. Every case has a decision.")); return; }
+    open.forEach(function (c) {
+      var b = make("button", "case");
+      var top = make("div", "top");
+      top.appendChild(make("span", "tag " + c.band, c.band));
+      top.appendChild(make("span", "score", c.score.toFixed(3)));
+      b.appendChild(top);
+      b.appendChild(make("p", "", c.title));
+      b.appendChild(make("div", "meta", fmt(c.tonnes_at_risk) + " t at risk · " + c.credits_at_risk + (c.credits_at_risk === 1 ? " credit" : " credits") + " · " + c.projects.join(", ")));
+      b.addEventListener("click", function () {
+        document.querySelectorAll(".case.on").forEach(function (n) { n.classList.remove("on"); });
+        b.classList.add("on");
+        var pts = byCase[c.id];
+        if (pts && pts.length) map.flyToBounds(L.latLngBounds(pts).pad(.6), { maxZoom: 6, duration: 1.1 });
+        el("map").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      host.appendChild(b);
+    });
+  }
+
+  function countries(list) {
+    var max = Math.max.apply(null, list.map(function (c) { return c.tonnes_at_risk; }).concat([1]));
+    var bars = el("bars"), rows = el("rows");
+    list.forEach(function (c) {
+      var bar = make("div", "bar");
+      var row = make("div", "row");
+      row.appendChild(make("span", "", c.country));
+      row.appendChild(make("span", "", fmt(c.tonnes_at_risk) + " t"));
+      var track = make("div", "track"), fill = make("div", "fill" + (c.tonnes_at_risk > 5000 ? " hot" : ""));
+      track.appendChild(fill); bar.appendChild(row); bar.appendChild(track); bars.appendChild(bar);
+      setTimeout(function () { fill.style.width = Math.max(c.tonnes_at_risk ? 4 : 0, c.tonnes_at_risk / max * 100) + "%"; }, 120);
+
+      var tr = make("tr");
+      [c.country, fmt(c.parcels), fmt(c.hectares), fmt(c.flagged), fmt(c.tonnes_at_risk)].forEach(function (v, i) {
+        var td = make("td", i ? "n" : "", v); if (i === 0) td.style.fontWeight = "700"; tr.appendChild(td);
+      });
+      var st = make("td"), pill = make("span", "pill " + (c.flagged ? "bad" : "good"), c.flagged ? "Needs review" : "Clear");
+      st.appendChild(pill); tr.appendChild(st); rows.appendChild(tr);
+    });
+  }
+
+  Promise.all([get("/api/overview"), get("/api/cases"), get("/api/map")]).then(function (r) {
+    var ov = r[0], cases = r[1].cases, m = r[2];
+    var flagged = m.parcels.filter(function (p) { return p.state !== "ok"; });
+    var ha = flagged.reduce(function (s, p) { return s + p.hectares; }, 0);
+    countUp(el("s-t"), ov.tonnes_at_risk);
+    countUp(el("s-c"), ov.open);
+    el("s-c2").textContent = ov.freeze_suggested + " suggested for freeze";
+    countUp(el("s-p"), flagged.length);
+    el("s-p2").textContent = "of " + m.parcels.length + " parcels";
+    countUp(el("s-h"), ha);
+    el("stamp").textContent = fmt(ov.nodes) + " nodes · " + fmt(ov.edges) + " edges";
+    draw(m); caseList(cases); countries(m.countries);
+  }).catch(function () {
+    el("stamp").textContent = "Server not reachable";
+  });
+})();
+</script>
+</body>
+</html>

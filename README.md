@@ -55,7 +55,7 @@ EcoGraph stores the carbon ledger in **FalkorDB** and gives an AI agent **graph 
 
 ## The app
 
-One Flutter codebase for iOS, Android and web, with a soft, rounded interface. On a phone: a splash and welcome, then five tabs.
+One Flutter codebase for iOS, Android and web, with a soft, rounded interface. On a wide browser window it becomes a review console. There is also a desktop **land map** at `/dashboard`: every parcel on a world map, red where two projects claim the same land, with the open cases and tonnes at risk by country. On a phone: a splash and welcome, then five tabs.
 
 | Tab | What you do |
 |---|---|
@@ -253,6 +253,7 @@ This project was built with AI assistance. Claude (Anthropic) wrote most of the 
 ## Links
 
 * **Live demo:** https://ecograph-790j.onrender.com
+* **Land map dashboard:** https://ecograph-790j.onrender.com/dashboard
 * **Android app (APK):** [Download the latest release](https://github.com/olowolayemogoodness-crypto/ecograph/releases/latest/download/ecograph.apk)
 * **Demo video:** _add your video link here_
 * **Blog post:** _add your blog link here_
