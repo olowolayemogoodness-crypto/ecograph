@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/logo.png" alt="EcoGraph logo" width="140">
+
 # EcoGraph
 
 **Count every tonne once.**
