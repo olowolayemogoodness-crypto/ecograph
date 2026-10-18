@@ -250,7 +250,7 @@ This project was built with AI assistance. Claude (Anthropic) wrote most of the 
 
 ## Links
 
-* **Live demo:** _add your Render link here_
+* **Live demo:** https://ecograph-790j.onrender.com
 * **Demo video:** _add your video link here_
 * **Blog post:** _add your blog link here_
 
